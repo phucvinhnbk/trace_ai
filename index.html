@@ -1510,6 +1510,10 @@ POST {địa chỉ}/run     ←  {"language":"cpp|python","source":"...","stdin"
                         </select>
                         <span>Áp dụng cho đọc câu trả lời và nút Nghe.</span>
                     </div>
+                    <div class="speech-speed-row" aria-label="Giọng đọc tiếng Việt">
+                        <label for="vi-voice-chat"><i class="fa fa-user-circle"></i> Giọng đọc:</label>
+                        <select id="vi-voice-chat" class="speech-speed-select" data-vi-voice><option value="female">Google Dịch · Nữ</option><option value="male">Google Dịch · Nam (giọng trầm)</option></select>
+                    </div>
                     <div class="voice-bar" id="voice-bar" style="display:none" aria-hidden="true">
                         <button type="button" id="autospeak-btn" class="vbtn"><i class="fa fa-volume-up"></i> <span>Tự đọc câu trả lời: Tắt</span></button>
                         <button type="button" id="stop-speak-btn" class="vbtn" style="display:none"><i class="fa fa-stop"></i> <span>Dừng đọc</span></button>
@@ -1651,6 +1655,10 @@ POST {địa chỉ}/run     ←  {"language":"cpp|python","source":"...","stdin"
                 <select id="speech-rate-voice" class="speech-speed-select" data-speech-rate>
                     <option value="0.75">Chậm · 0,75×</option><option value="1">Bình thường · 1×</option><option value="1.25">Nhanh · 1,25×</option><option value="1.5">Rất nhanh · 1,5×</option>
                 </select>
+            </div>
+            <div class="vo-speed-row" aria-label="Giọng đọc của AI">
+                <label for="vi-voice-vo"><i class="fa fa-user-circle"></i> Giọng đọc</label>
+                <select id="vi-voice-vo" class="speech-speed-select" data-vi-voice><option value="female">Google Dịch · Nữ</option><option value="male">Google Dịch · Nam (giọng trầm)</option></select>
             </div>
             <div class="vo-bar">
                 <button type="button" class="vo-ctl" id="vo-mute" aria-label="Tắt micro" title="Tắt micro" aria-pressed="false"></button>
@@ -5237,24 +5245,30 @@ Current topic: ${enTopic ? enTopic.en : 'anything the learner likes'}.`;
 })();
 </script>
 <script id="trace-vi-voice">
-/* Giọng đọc tiếng Việt online: dùng khi máy không có giọng tiếng Việt (hoặc khi bạn chọn).
-   Thứ tự: Gemini TTS (cần key Gemini) -> Google (không cần key) -> giọng có sẵn trong máy. */
+/* Giọng đọc tiếng Việt: Google Dịch (nữ) và Google Dịch (nam = cùng giọng, hạ cao độ).
+   Nếu tải giọng online lỗi thì tự chuyển sang giọng có sẵn trong máy. */
 (function () {
-  const GEM_MODELS = ['gemini-2.5-flash-preview-tts', 'gemini-2.5-flash-tts', 'gemini-2.5-pro-preview-tts'];
   const origSpeak = speak, origStop = stopSpeaking;
-  let ot = 0, audio = null, url = '', pul = 0, warned = false;
+  const VOICE_KEY = 'vi_voice';
+  // Giọng nam: phát chậm hơn + không giữ cao độ => giọng trầm hơn. Tốc độ nói chỉ chỉnh nhẹ để giọng luôn trầm.
+  const maleRate = () => Math.min(0.95, Math.max(0.72, 0.8 + (speechRate - 1) * 0.25));
+  let viVoice = store.get(VOICE_KEY) === 'male' ? 'male' : 'female';
+  let ot = 0, audio = null, pul = 0, warned = false;
+  const sels = Array.from(document.querySelectorAll('[data-vi-voice]'));
 
-  function geminiKey() {
-    const m = MODELS[CONFIG.selectedModel];
-    if (CONFIG.apiKey && m && m.provider === 'gemini') return CONFIG.apiKey;
-    return store.get('live_key') || '';
+  function setViVoice(v, preview) {
+    viVoice = v === 'male' ? 'male' : 'female';
+    store.set(VOICE_KEY, viVoice);
+    sels.forEach(x => { x.value = viVoice; });
+    const busy = window.traceVoiceUI && window.traceVoiceUI.state && window.traceVoiceUI.state().open;
+    if (preview && !busy) speak('Xin chào, mình là trợ lý học tập của bạn. Đây là giọng đọc tiếng Việt.', null, 'vi-VN');
   }
-  function chooseEngine() { return 'google'; }   // tiếng Việt luôn dùng giọng Google Dịch
+  sels.forEach(x => { x.value = viVoice; x.addEventListener('change', () => setViVoice(x.value, true)); });
+
   function stopOnline() {
     ot++;
     clearInterval(pul); pul = 0;
     if (audio) { const a = audio; audio = null; a.onended = a.onerror = null; try { a.pause(); } catch (e) {} a.removeAttribute('src'); try { a.load(); } catch (e) {} }
-    if (url) { URL.revokeObjectURL(url); url = ''; }
   }
   stopSpeaking = function () { stopOnline(); return origStop.apply(this, arguments); };
 
@@ -5268,53 +5282,21 @@ Current topic: ${enTopic ? enTopic.en : 'anything the learner likes'}.`;
     out.forEach(t => { if (m.length && (m[m.length - 1] + ' ' + t).length <= 180) m[m.length - 1] += ' ' + t; else m.push(t); });
     return m;
   }
-  function pcmToWav(bytes, rate) {
-    const h = new ArrayBuffer(44), v = new DataView(h);
-    const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-    w(0, 'RIFF'); v.setUint32(4, 36 + bytes.length, true); w(8, 'WAVE'); w(12, 'fmt ');
-    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
-    v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
-    w(36, 'data'); v.setUint32(40, bytes.length, true);
-    return new Blob([h, bytes], { type: 'audio/wav' });
-  }
-  async function geminiWav(text) {
-    const key = geminiKey();
-    if (!key) throw new Error('no key');
-    let lastErr = null;
-    const order = [store.get('vi_tts_model')].filter(Boolean).concat(GEM_MODELS.filter(m => m !== store.get('vi_tts_model')));
-    for (const model of order) {
-      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text }] }],
-          generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } } }
-        })
-      });
-      if (r.status === 429 || r.status === 401 || r.status === 403) throw new Error('http ' + r.status);
-      if (!r.ok) { lastErr = new Error('http ' + r.status); continue; }   // model không tồn tại: thử tên khác
-      const j = await r.json();
-      const part = ((j.candidates || [])[0] || {}).content;
-      const inline = part && (part.parts || []).find(x => x.inlineData && x.inlineData.data);
-      if (!inline) { lastErr = new Error('no audio'); continue; }
-      store.set('vi_tts_model', model);
-      const bin = atob(inline.inlineData.data), bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      return pcmToWav(bytes, 24000);
-    }
-    throw lastErr || new Error('gemini tts');
-  }
-  function playUrl(src, token, revoke) {
+  function playUrl(src, token) {
     return new Promise((res, rej) => {
       if (token !== ot) { res(); return; }
       const a = new Audio();
       audio = a;
-      if (revoke) url = src;
       a.preload = 'auto';
+      const male = viVoice === 'male';
+      const setPitch = () => { a.preservesPitch = !male; a.mozPreservesPitch = !male; a.webkitPreservesPitch = !male; a.playbackRate = male ? maleRate() : speechRate; };
       a.onended = () => res();
       a.onerror = () => rej(new Error('audio'));
+      setPitch();
       a.src = src;
-      a.playbackRate = speechRate;
+      setPitch();
+      a.addEventListener('loadedmetadata', setPitch);
+      a.addEventListener('playing', setPitch);
       const pr = a.play();
       if (pr && pr.catch) pr.catch(rej);
     });
@@ -5322,46 +5304,31 @@ Current topic: ${enTopic ? enTopic.en : 'anything the learner likes'}.`;
   function say(text) {
     if (window.VO) { VO.say(text); clearInterval(pul); pul = setInterval(() => VO.pulse(0.6), 260); }
   }
-  async function onlineSpeak(text, onDone, eng) {
+  async function onlineSpeak(text, onDone) {
     stopOnline(); origStop.call(window);
     const token = ++ot;
     const pcs = pieces180(text);
     if (!pcs.length) { if (onDone) onDone(); return; }
     updateSpeakUI(true);
-    const grp = (i) => {
-      let t = pcs[i], n = 1;
-      while (i + n < pcs.length && (t + ' ' + pcs[i + n]).length <= 450) { t += ' ' + pcs[i + n]; n++; }
-      return { idx: i, n, text: t, p: geminiWav(t) };
-    };
-    let i = 0, pre = null;
+    let i = 0;
     while (i < pcs.length) {
       if (token !== ot) return;
-      try {
-        if (eng === 'gemini') {
-          const g = (pre && pre.idx === i) ? pre : grp(i);
-          g.p.catch(() => {});
-          const wav = await g.p;
+      const url = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=vi&q=' + encodeURIComponent(pcs[i]);
+      let ok = false;
+      for (let tryN = 0; tryN < 2 && !ok; tryN++) {
+        try {
+          if (tryN) await new Promise(r => setTimeout(r, 350));
           if (token !== ot) return;
-          const j = i + g.n;
-          pre = j < pcs.length ? grp(j) : null;
-          if (pre) pre.p.catch(() => {});
-          say(g.text);
-          const u = URL.createObjectURL(wav);
-          await playUrl(u, token, true);
-          URL.revokeObjectURL(u); url = '';
-          i = j;
-        } else {
           say(pcs[i]);
-          await playUrl('https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=vi&q=' + encodeURIComponent(pcs[i]), token, false);
-          i++;
-        }
-      } catch (e) {
-        if (token !== ot) return;
-        pre = null;
-        eng = eng === 'gemini' ? 'google' : 'system';
-        if (!warned) { warned = true; showToast(eng === 'google' ? 'Giọng Gemini chưa dùng được, chuyển sang giọng Google.' : 'Không tải được giọng online, chuyển sang giọng có sẵn trong máy.', false); }
-        if (eng === 'system') { clearInterval(pul); origSpeak(pcs.slice(i).join(' '), onDone, 'vi-VN'); return; }
+          await playUrl(url, token);
+          ok = true;
+        } catch (e) { if (token !== ot) return; }
       }
+      if (ok) { i++; continue; }
+      showToast('Google không trả giọng đọc (có thể bị giới hạn tạm thời), đang dùng giọng có sẵn trong máy nên không có giọng nam.', false);
+      clearInterval(pul);
+      origSpeak(pcs.slice(i).join(' '), onDone, 'vi-VN');
+      return;
     }
     clearInterval(pul); pul = 0;
     if (token === ot) { updateSpeakUI(false); if (onDone) onDone(); }
@@ -5369,11 +5336,8 @@ Current topic: ${enTopic ? enTopic.en : 'anything the learner likes'}.`;
   speak = function (text, onDone, lang) {
     lang = lang || 'vi-VN';
     if (lang !== 'vi-VN') { stopOnline(); return origSpeak.apply(this, arguments); }
-    const eng = chooseEngine();
-    if (eng === 'system') { stopOnline(); return origSpeak.apply(this, arguments); }
-    return onlineSpeak(text, onDone, eng);
+    return onlineSpeak(text, onDone);
   };
-
 })();
 </script>
 <script id="trace-replay">
