@@ -6524,7 +6524,7 @@ function doReset(){
 function compile(){
   pause();
   const r0=E.simulate(ta.value,langSel.value,sin.value);
-  if(r0.fatal==='unsup'&&window.TraceFull){setMsg('','⏳ Cú pháp ngoài tập con tích hợp — đang chạy bằng bộ chạy đầy đủ (lần đầu có thể mất vài chục giây)…');window.TraceFull.replay(ta.value,langSel.value,sin.value).then(x=>compile2(x),e=>{compile2(r0);setMsg('warn','Không dùng được bộ chạy đầy đủ ('+esc(e.message)+'). Cần kết nối mạng.')});return}
+  if(r0.fatal&&window.TraceFull){setMsg('','⏳ Cú pháp ngoài tập con tích hợp — đang chạy bằng bộ chạy đầy đủ (lần đầu có thể mất vài chục giây)…');window.TraceFull.replay(ta.value,langSel.value,sin.value).then(x=>compile2(x),e=>{compile2(r0);setMsg('warn','Không dùng được bộ chạy đầy đủ ('+esc(e.message)+'). Cần kết nối mạng.')});return}
   compile2(r0)}
 function compile2(r){st.res=r;
   if(r.fatal){
