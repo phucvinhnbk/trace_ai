@@ -8097,6 +8097,7 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
 #acct-btn .ac-name{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 
+<style>#acct-modal [hidden]{display:none!important}</style>
 <div id="acct-modal" role="dialog" aria-modal="true" aria-labelledby="acct-title">
   <div class="ac-card">
     <div class="ac-head">
@@ -8104,7 +8105,7 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
       <button type="button" class="ac-x" id="acct-close" aria-label="Đóng">✕</button>
     </div>
     <div id="acct-guest">
-      <div class="ac-tabs" role="tablist">
+      <div class="ac-tabs" id="acct-tabs" role="tablist">
         <button type="button" class="ac-tab on" id="acct-tab-in" data-mode="in" role="tab">Đăng nhập</button>
         <button type="button" class="ac-tab" id="acct-tab-up" data-mode="up" role="tab">Tạo tài khoản</button>
       </div>
@@ -8113,11 +8114,15 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
           <label for="acct-name">Tên tài khoản</label>
           <input id="acct-name" type="text" autocomplete="name" placeholder="Ví dụ: Phúc Vinh" maxlength="20">
         </div>
-        <div class="ac-field">
+        <div class="ac-field" id="acct-code-wrap" hidden>
+          <label for="acct-code">Mã xác nhận (6 số)</label>
+          <input id="acct-code" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="6">
+        </div>
+        <div class="ac-field" id="acct-email-wrap" hidden>
           <label for="acct-email">Email</label>
           <input id="acct-email" type="email" inputmode="email" autocomplete="email" placeholder="ban@example.com" maxlength="120">
         </div>
-        <div class="ac-field">
+        <div class="ac-field" id="acct-pass-wrap">
           <label for="acct-pass">Mật khẩu</label>
           <div class="ac-pw">
             <input id="acct-pass" type="password" autocomplete="current-password" placeholder="Ít nhất 6 ký tự" maxlength="100">
@@ -8133,6 +8138,8 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
         </div>
         <div class="ac-msg" id="acct-msg" role="alert"></div>
         <button type="submit" class="ac-go" id="acct-go">Đăng nhập</button>
+        <button type="button" id="acct-forgot" style="display:block;margin:12px auto 0;background:none;border:0;color:inherit;opacity:.75;text-decoration:underline;cursor:pointer;font:inherit;font-size:13px">Quên mật khẩu?</button>
+        <button type="button" id="acct-back" hidden style="display:block;margin:12px auto 0;background:none;border:0;color:inherit;opacity:.75;text-decoration:underline;cursor:pointer;font:inherit;font-size:13px">← Quay lại đăng nhập</button>
       </form>
       <p class="ac-note">Tài khoản được lưu ngay trên trình duyệt này, mật khẩu được mã hóa và không gửi đi đâu.</p>
     </div>
@@ -8153,6 +8160,10 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
   var modal = $('acct-modal'), btn = $('acct-btn'), label = $('acct-label');
   var form = $('acct-form'), nameIn = $('acct-name'), email = $('acct-email'), pass = $('acct-pass'), pass2 = $('acct-pass2');
   var msg = $('acct-msg'), go = $('acct-go'), mode = 'in', busy = false;
+  var codeIn = $('acct-code'), reset = null;
+  // Gửi mã qua email bằng EmailJS (https://www.emailjs.com) — điền 3 giá trị này để bật tính năng quên mật khẩu.
+  // Template EmailJS cần dùng biến: {{to_email}} (ô "To email"), {{to_name}}, {{code}}.
+  var EMAILJS = { service: '', template: '', key: '' };
 
   function accounts() { try { var o = JSON.parse(window.store.get(ACC) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } }
   function saveAccounts(o) { window.store.set(ACC, JSON.stringify(o)); }
@@ -8184,10 +8195,19 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     $('acct-tab-up').classList.toggle('on', m === 'up');
     $('acct-tab-in').setAttribute('aria-selected', String(m === 'in'));
     $('acct-tab-up').setAttribute('aria-selected', String(m === 'up'));
-    $('acct-confirm-wrap').hidden = m !== 'up';
-    $('acct-name-wrap').hidden = m !== 'up';
-    pass.autocomplete = m === 'up' ? 'new-password' : 'current-password';
-    go.textContent = m === 'up' ? 'Tạo tài khoản' : 'Đăng nhập';
+    var fg = m === 'fg1' || m === 'fg2';
+    $('acct-tabs').hidden = fg;
+    $('acct-name-wrap').hidden = m === 'fg2';
+    $('acct-email-wrap').hidden = m !== 'up';
+    $('acct-code-wrap').hidden = m !== 'fg2';
+    $('acct-pass-wrap').hidden = m === 'fg1';
+    $('acct-confirm-wrap').hidden = !(m === 'up' || m === 'fg2');
+    $('acct-forgot').hidden = m !== 'in';
+    $('acct-back').hidden = !fg;
+    nameIn.autocomplete = m === 'up' ? 'name' : 'username';
+    pass.autocomplete = (m === 'up' || m === 'fg2') ? 'new-password' : 'current-password';
+    modal.querySelector('label[for="acct-pass"]').textContent = m === 'fg2' ? 'Mật khẩu mới' : 'Mật khẩu';
+    go.textContent = { in: 'Đăng nhập', up: 'Tạo tài khoản', fg1: 'Gửi mã về email', fg2: 'Đổi mật khẩu' }[m];
     say('');
   }
 
@@ -8213,7 +8233,7 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
 
   function signup(e, p, p2, nm) {
     if (!validName(nm)) return say('Tên dài 2–20 ký tự, chỉ gồm chữ, số, dấu cách, . _ -');
-    if (nameTaken(nm)) return say('Tên này đã có người dùng. Hãy chọn tên khác.');
+    if (nameTaken(nm)) return say('Đã có người đặt tên này. Hãy chọn tên khác.');
     if (!validEmail(e)) return say('Email chưa đúng định dạng.');
     if (p.length < 6) return say('Mật khẩu cần ít nhất 6 ký tự.');
     if (p !== p2) return say('Hai mật khẩu chưa khớp.');
@@ -8225,7 +8245,7 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
       var cur = accounts();
       if (cur[e]) { say('Email này đã có tài khoản. Hãy đăng nhập.'); return; }
       var taken = Object.keys(cur).some(function (k) { return nameOf(cur[k], k).toLowerCase() === nm.toLowerCase(); });
-      if (taken) { say('Tên này đã có người dùng. Hãy chọn tên khác.'); return; }
+      if (taken) { say('Đã có người đặt tên này. Hãy chọn tên khác.'); return; }
       cur[e] = { name: nm, salt: b64(salt), hash: h, iter: ITER, created: Date.now() };
       saveAccounts(cur);
       window.store.set(SES, e);
@@ -8233,18 +8253,95 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     });
   }
 
-  function login(e, p) {
-    if (!validEmail(e)) return say('Email chưa đúng định dạng.');
+  function emailByName(nm) {
+    var k = cleanName(nm).toLowerCase(), all = accounts();
+    return Object.keys(all).filter(function (e) { return nameOf(all[e], e).toLowerCase() === k; })[0] || null;
+  }
+  function mask(e) { var a = e.split('@'); return a[0].charAt(0) + '***@' + a[1]; }
+
+  function login(nm, p) {
+    if (!nm) return say('Hãy nhập tên tài khoản.');
     if (!p) return say('Hãy nhập mật khẩu.');
-    var rec = accounts()[e];
+    var e = emailByName(nm), rec = e && accounts()[e];
     setBusy(true);
     if (!rec) {
-      return derive(p, new Uint8Array(16), ITER).then(function () { say('Email hoặc mật khẩu không đúng.'); });
+      return derive(p, new Uint8Array(16), ITER).then(function () { say('Tên tài khoản hoặc mật khẩu không đúng.'); });
     }
     return derive(p, unb64(rec.salt), rec.iter || ITER).then(function (h) {
-      if (!same(h, rec.hash)) { say('Email hoặc mật khẩu không đúng.'); return; }
+      if (!same(h, rec.hash)) { say('Tên tài khoản hoặc mật khẩu không đúng.'); return; }
       window.store.set(SES, e);
       paint(); close();
+    });
+  }
+
+  function sendCode(nm) {
+    if (!nm) return say('Hãy nhập tên tài khoản.');
+    var e = emailByName(nm);
+    if (!e) return say('Không tìm thấy tên tài khoản này.');
+    if (reset && reset.email === e && Date.now() < reset.next) return say('Vui lòng đợi ' + Math.ceil((reset.next - Date.now()) / 1000) + ' giây rồi gửi lại mã.');
+    var a = new Uint32Array(1); window.crypto.getRandomValues(a);
+    var code = String(a[0] % 1000000); while (code.length < 6) code = '0' + code;
+    setBusy(true);
+    var nmShow = nameOf(accounts()[e], e), hasEJS = EMAILJS.service && EMAILJS.template && EMAILJS.key, req;
+    if (hasEJS) {
+      // Nếu có điền EmailJS thì vẫn dùng EmailJS như cũ.
+      req = fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ service_id: EMAILJS.service, template_id: EMAILJS.template, user_id: EMAILJS.key,
+          template_params: { to_email: e, to_name: nmShow, code: code } })
+      }).then(function (r) { if (!r.ok) throw new Error('send'); return {}; });
+    } else {
+      // Mặc định: tự gửi thẳng tới email của người đăng ký qua FormSubmit (không cần cấu hình / khóa API).
+      req = fetch('https://formsubmit.co/ajax/' + encodeURIComponent(e).replace('%40', '@'), {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          _subject: 'Mã xác nhận đặt lại mật khẩu: ' + code,
+          _template: 'box', _captcha: 'false',
+          'Tài khoản': nmShow,
+          'Mã xác nhận': code,
+          'Ghi chú': 'Mã có hạn 10 phút. Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.'
+        })
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          if (!r.ok || j.success === false || j.success === 'false') { var er = new Error('send'); er.detail = j && j.message; throw er; }
+          return j;
+        });
+      });
+    }
+    return req.then(function (j) {
+      if (j && /activat/i.test(String(j.message || ''))) {
+        say('Lần đầu gửi tới email này, cần xác nhận một lần: mở email ' + mask(e) + ' (cả mục Spam), bấm "Activate Form" rồi bấm "Gửi mã về email" lại.');
+        return;
+      }
+      reset = { email: e, code: code, exp: Date.now() + 600000, tries: 0, next: Date.now() + 60000 };
+      setMode('fg2');
+      say('Đã gửi mã 6 số tới ' + mask(e) + '. Mã có hạn 10 phút (nhớ xem cả mục Spam).', true);
+    }).catch(function (er) {
+      var d = er && er.detail ? ' (' + String(er.detail).slice(0, 120) + ')' : '';
+      say('Không gửi được email. Hãy kiểm tra mạng rồi thử lại.' + d);
+    });
+  }
+
+  function doReset(code, p, p2) {
+    if (!reset) { setMode('fg1'); return say('Hãy yêu cầu gửi mã trước.'); }
+    if (Date.now() > reset.exp) { reset = null; setMode('fg1'); return say('Mã đã hết hạn. Hãy gửi lại mã.'); }
+    if (!/^\d{6}$/.test(code)) return say('Mã gồm 6 chữ số.');
+    if (code !== reset.code) {
+      if (++reset.tries >= 5) { reset = null; setMode('fg1'); return say('Nhập sai quá 5 lần. Hãy gửi lại mã.'); }
+      return say('Mã không đúng.');
+    }
+    if (p.length < 6) return say('Mật khẩu cần ít nhất 6 ký tự.');
+    if (p !== p2) return say('Hai mật khẩu chưa khớp.');
+    var salt = window.crypto.getRandomValues(new Uint8Array(16)), e = reset.email;
+    setBusy(true);
+    return derive(p, salt, ITER).then(function (h) {
+      var cur = accounts();
+      if (!cur[e]) { say('Tài khoản không còn tồn tại.'); return; }
+      cur[e].salt = b64(salt); cur[e].hash = h; cur[e].iter = ITER;
+      saveAccounts(cur);
+      reset = null; pass.value = pass2.value = codeIn.value = '';
+      setMode('in');
+      say('Đổi mật khẩu thành công. Hãy đăng nhập bằng mật khẩu mới.', true);
     });
   }
 
@@ -8252,8 +8349,8 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     ev.preventDefault();
     if (busy) return;
     say('');
-    var e = norm(email.value), p = pass.value, r;
-    try { r = mode === 'up' ? signup(e, p, pass2.value, cleanName(nameIn.value)) : login(e, p); } catch (x) { r = null; say('Trình duyệt này chưa hỗ trợ mã hóa mật khẩu. Hãy mở trang bằng Chrome hoặc Edge mới.'); }
+    var e = norm(email.value), p = pass.value, nm = cleanName(nameIn.value), r;
+    try { r = mode === 'up' ? signup(e, p, pass2.value, nm) : mode === 'fg1' ? sendCode(nm) : mode === 'fg2' ? doReset(codeIn.value.trim(), p, pass2.value) : login(nm, p); } catch (x) { r = null; say('Trình duyệt này chưa hỗ trợ mã hóa mật khẩu. Hãy mở trang bằng Chrome hoặc Edge mới.'); }
     if (r && r.then) {
       r.then(function () { setBusy(false); }, function () { setBusy(false); say('Trình duyệt này chưa hỗ trợ mã hóa mật khẩu. Hãy mở trang bằng Chrome hoặc Edge mới.'); });
     } else { setBusy(false); }
@@ -8261,6 +8358,8 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
 
   $('acct-tab-in').addEventListener('click', function () { setMode('in'); });
   $('acct-tab-up').addEventListener('click', function () { setMode('up'); });
+  $('acct-forgot').addEventListener('click', function () { setMode('fg1'); });
+  $('acct-back').addEventListener('click', function () { setMode('in'); });
   Array.prototype.forEach.call(modal.querySelectorAll('.ac-eye'), function (b) {
     b.addEventListener('click', function () {
       var i = $(b.getAttribute('data-eye')), show = i.type === 'password';
