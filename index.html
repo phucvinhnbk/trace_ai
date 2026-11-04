@@ -1038,7 +1038,7 @@ html[data-skin="midnight"]{--sk-accent:#818CF8;--sk-accent2:#38BDF8;--sk-bg:line
 html[data-skin="sand"]{--sk-accent:#B45309;--sk-accent2:#D97706;--sk-bg:linear-gradient(145deg,#FFF7E6,#FBEBCB 55%,#FFF9F0);--sk-surface:#FFFDF8;--sk-surface2:#FBF1DE;--sk-soft:#F8E7C4;--sk-text:#3B2A12;--sk-muted:#7A6240;--sk-border:#EBD7AE;--sk-glass:rgba(255,250,240,.85);--sk-glow:rgba(180,83,9,.18);--sk-on:#fff;--sk-shadow:rgba(180,83,9,.10)}
 </style>
 <style id="ia-css">
-#ia-main{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:8px;border-radius:20px;background:var(--sk-glass,rgba(255,255,255,.85));border:1px solid var(--sk-border,#e2e8f0);box-shadow:0 6px 22px var(--sk-shadow,rgba(0,0,0,.08));margin-bottom:10px}
+#ia-main{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;padding:8px;border-radius:20px;background:var(--sk-glass,rgba(255,255,255,.85));border:1px solid var(--sk-border,#e2e8f0);box-shadow:0 6px 22px var(--sk-shadow,rgba(0,0,0,.08));margin-bottom:10px}
 #ia-main button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;border:0;border-radius:14px;background:transparent;color:var(--sk-muted,#64748b);font-weight:700;font-size:.78rem;cursor:pointer;transition:background .18s,color .18s}
 #ia-main .ia-ic{font-size:1.2rem;line-height:1}
 #ia-main button:hover{background:var(--sk-surface2,#f1f5f9);color:var(--sk-text,#1e293b)}
@@ -1081,7 +1081,7 @@ body.ia-tool #chat-card,body.ia-tool #en-card,body.ia-tool #trace-mode-info,body
 .ia-table{width:100%;border-collapse:collapse;font-size:.84rem}
 .ia-table th,.ia-table td{text-align:left;padding:7px;border-top:1px solid var(--sk-border,#e2e8f0);vertical-align:top}
 .ia-table th{font-size:.72rem;color:var(--sk-muted,#64748b);text-transform:uppercase}
-@media(max-width:720px){#ia-main{grid-template-columns:repeat(3,minmax(0,1fr))}.ia-split,.ia-grid{grid-template-columns:1fr}.ia-bar{grid-template-columns:90px minmax(0,1fr) 36px}}
+@media(max-width:720px){#ia-main{grid-template-columns:repeat(4,minmax(0,1fr))}.ia-split,.ia-grid{grid-template-columns:1fr}.ia-bar{grid-template-columns:90px minmax(0,1fr) 36px}}
 </style>
 <style id="trace-feynman-css">.fy-help{margin:-2px 0 10px}.fy-help[hidden],.fy-help-panel[hidden]{display:none}
 .fy-help-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--sk-border,#e2e8f0);background:var(--sk-surface,#fff);font-size:1rem;line-height:1;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);transition:transform .15s}
@@ -1179,7 +1179,6 @@ html[data-theme="dark"] .tl-shell{--wn:#fbbf24}
 <button id="side-btn" type="button" class="hdr-tg w-10 h-10 rounded-xl bg-white border border-neutral-200 flex items-center justify-center hover:border-primary/50 hover:shadow-md transition-all text-primary" aria-pressed="true" title="Ẩn lịch &amp; đồng hồ"><i class="fa fa-calendar"></i></button>
             <button id="theme-btn" type="button" aria-label="Đổi giao diện sáng/tối"
                 class="w-10 h-10 rounded-xl bg-white border border-neutral-200 flex items-center justify-center hover:border-primary/50 hover:shadow-md transition-all"></button>
-            
             <button id="acct-btn" type="button" class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white border border-neutral-200 hover:border-primary/50 hover:shadow-md transition-all text-sm font-medium text-neutral-700" aria-haspopup="dialog" title="Đăng nhập hoặc tạo tài khoản">
                 <svg class="text-primary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span id="acct-label" class="ac-name hidden sm:inline">Đăng nhập</span><span class="ac-dot"></span>
             </button>
@@ -7989,7 +7988,7 @@ $('ia-root').addEventListener('click',e=>{const b=e.target.closest('[data-act]')
 
 /* ---- Khung điều hướng ---- */
 const main=$('ia-main');
-main.innerHTML=IA.map(g=>`<button type="button" data-g="${g.id}"><span class="ia-ic">${g.icon}</span><span>${esc(g.label)}</span></button>`).join('');
+main.innerHTML=IA.map(g=>`<button type="button" data-g="${g.id}"><span class="ia-ic">${g.icon}</span><span>${esc(g.label)}</span></button>`+(g.id==='review'?`<button type="button" id="arena-btn" aria-haspopup="dialog" title="Đấu trường: đấu tay đôi tiếng Anh"><span class="ia-ic">⚔️</span><span>Đấu trường</span></button>`:'')).join('');
 main.addEventListener('click',e=>{
  const b=e.target.closest('button[data-g]');if(!b)return;
  const g=IA.find(x=>x.id===b.dataset.g),last=ld('ia_last_'+g.id,null);
@@ -8114,10 +8113,6 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
           <label for="acct-name">Tên tài khoản</label>
           <input id="acct-name" type="text" autocomplete="name" placeholder="Ví dụ: Phúc Vinh" maxlength="20">
         </div>
-        <div class="ac-field" id="acct-code-wrap" hidden>
-          <label for="acct-code">Mã xác nhận (6 số)</label>
-          <input id="acct-code" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="6">
-        </div>
         <div class="ac-field" id="acct-email-wrap" hidden>
           <label for="acct-email">Email</label>
           <input id="acct-email" type="email" inputmode="email" autocomplete="email" placeholder="ban@example.com" maxlength="120">
@@ -8138,8 +8133,6 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
         </div>
         <div class="ac-msg" id="acct-msg" role="alert"></div>
         <button type="submit" class="ac-go" id="acct-go">Đăng nhập</button>
-        <button type="button" id="acct-forgot" style="display:block;margin:12px auto 0;background:none;border:0;color:inherit;opacity:.75;text-decoration:underline;cursor:pointer;font:inherit;font-size:13px">Quên mật khẩu?</button>
-        <button type="button" id="acct-back" hidden style="display:block;margin:12px auto 0;background:none;border:0;color:inherit;opacity:.75;text-decoration:underline;cursor:pointer;font:inherit;font-size:13px">← Quay lại đăng nhập</button>
       </form>
       <p class="ac-note">Tài khoản được lưu ngay trên trình duyệt này, mật khẩu được mã hóa và không gửi đi đâu.</p>
     </div>
@@ -8160,10 +8153,6 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
   var modal = $('acct-modal'), btn = $('acct-btn'), label = $('acct-label');
   var form = $('acct-form'), nameIn = $('acct-name'), email = $('acct-email'), pass = $('acct-pass'), pass2 = $('acct-pass2');
   var msg = $('acct-msg'), go = $('acct-go'), mode = 'in', busy = false;
-  var codeIn = $('acct-code'), reset = null;
-  // Gửi mã qua email bằng EmailJS (https://www.emailjs.com) — điền 3 giá trị này để bật tính năng quên mật khẩu.
-  // Template EmailJS cần dùng biến: {{to_email}} (ô "To email"), {{to_name}}, {{code}}.
-  var EMAILJS = { service: '', template: '', key: '' };
 
   function accounts() { try { var o = JSON.parse(window.store.get(ACC) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } }
   function saveAccounts(o) { window.store.set(ACC, JSON.stringify(o)); }
@@ -8195,19 +8184,12 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     $('acct-tab-up').classList.toggle('on', m === 'up');
     $('acct-tab-in').setAttribute('aria-selected', String(m === 'in'));
     $('acct-tab-up').setAttribute('aria-selected', String(m === 'up'));
-    var fg = m === 'fg1' || m === 'fg2';
-    $('acct-tabs').hidden = fg;
-    $('acct-name-wrap').hidden = m === 'fg2';
+    $('acct-name-wrap').hidden = false;
     $('acct-email-wrap').hidden = m !== 'up';
-    $('acct-code-wrap').hidden = m !== 'fg2';
-    $('acct-pass-wrap').hidden = m === 'fg1';
-    $('acct-confirm-wrap').hidden = !(m === 'up' || m === 'fg2');
-    $('acct-forgot').hidden = m !== 'in';
-    $('acct-back').hidden = !fg;
+    $('acct-confirm-wrap').hidden = m !== 'up';
     nameIn.autocomplete = m === 'up' ? 'name' : 'username';
-    pass.autocomplete = (m === 'up' || m === 'fg2') ? 'new-password' : 'current-password';
-    modal.querySelector('label[for="acct-pass"]').textContent = m === 'fg2' ? 'Mật khẩu mới' : 'Mật khẩu';
-    go.textContent = { in: 'Đăng nhập', up: 'Tạo tài khoản', fg1: 'Gửi mã về email', fg2: 'Đổi mật khẩu' }[m];
+    pass.autocomplete = m === 'up' ? 'new-password' : 'current-password';
+    go.textContent = { in: 'Đăng nhập', up: 'Tạo tài khoản' }[m];
     say('');
   }
 
@@ -8274,83 +8256,12 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     });
   }
 
-  function sendCode(nm) {
-    if (!nm) return say('Hãy nhập tên tài khoản.');
-    var e = emailByName(nm);
-    if (!e) return say('Không tìm thấy tên tài khoản này.');
-    if (reset && reset.email === e && Date.now() < reset.next) return say('Vui lòng đợi ' + Math.ceil((reset.next - Date.now()) / 1000) + ' giây rồi gửi lại mã.');
-    var a = new Uint32Array(1); window.crypto.getRandomValues(a);
-    var code = String(a[0] % 1000000); while (code.length < 6) code = '0' + code;
-    setBusy(true);
-    var nmShow = nameOf(accounts()[e], e), hasEJS = EMAILJS.service && EMAILJS.template && EMAILJS.key, req;
-    if (hasEJS) {
-      // Nếu có điền EmailJS thì vẫn dùng EmailJS như cũ.
-      req = fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ service_id: EMAILJS.service, template_id: EMAILJS.template, user_id: EMAILJS.key,
-          template_params: { to_email: e, to_name: nmShow, code: code } })
-      }).then(function (r) { if (!r.ok) throw new Error('send'); return {}; });
-    } else {
-      // Mặc định: tự gửi thẳng tới email của người đăng ký qua FormSubmit (không cần cấu hình / khóa API).
-      req = fetch('https://formsubmit.co/ajax/' + encodeURIComponent(e).replace('%40', '@'), {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          _subject: 'Mã xác nhận đặt lại mật khẩu: ' + code,
-          _template: 'box', _captcha: 'false',
-          'Tài khoản': nmShow,
-          'Mã xác nhận': code,
-          'Ghi chú': 'Mã có hạn 10 phút. Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.'
-        })
-      }).then(function (r) {
-        return r.json().catch(function () { return {}; }).then(function (j) {
-          if (!r.ok || j.success === false || j.success === 'false') { var er = new Error('send'); er.detail = j && j.message; throw er; }
-          return j;
-        });
-      });
-    }
-    return req.then(function (j) {
-      if (j && /activat/i.test(String(j.message || ''))) {
-        say('Lần đầu gửi tới email này, cần xác nhận một lần: mở email ' + mask(e) + ' (cả mục Spam), bấm "Activate Form" rồi bấm "Gửi mã về email" lại.');
-        return;
-      }
-      reset = { email: e, code: code, exp: Date.now() + 600000, tries: 0, next: Date.now() + 60000 };
-      setMode('fg2');
-      say('Đã gửi mã 6 số tới ' + mask(e) + '. Mã có hạn 10 phút (nhớ xem cả mục Spam).', true);
-    }).catch(function (er) {
-      var d = er && er.detail ? ' (' + String(er.detail).slice(0, 120) + ')' : '';
-      say('Không gửi được email. Hãy kiểm tra mạng rồi thử lại.' + d);
-    });
-  }
-
-  function doReset(code, p, p2) {
-    if (!reset) { setMode('fg1'); return say('Hãy yêu cầu gửi mã trước.'); }
-    if (Date.now() > reset.exp) { reset = null; setMode('fg1'); return say('Mã đã hết hạn. Hãy gửi lại mã.'); }
-    if (!/^\d{6}$/.test(code)) return say('Mã gồm 6 chữ số.');
-    if (code !== reset.code) {
-      if (++reset.tries >= 5) { reset = null; setMode('fg1'); return say('Nhập sai quá 5 lần. Hãy gửi lại mã.'); }
-      return say('Mã không đúng.');
-    }
-    if (p.length < 6) return say('Mật khẩu cần ít nhất 6 ký tự.');
-    if (p !== p2) return say('Hai mật khẩu chưa khớp.');
-    var salt = window.crypto.getRandomValues(new Uint8Array(16)), e = reset.email;
-    setBusy(true);
-    return derive(p, salt, ITER).then(function (h) {
-      var cur = accounts();
-      if (!cur[e]) { say('Tài khoản không còn tồn tại.'); return; }
-      cur[e].salt = b64(salt); cur[e].hash = h; cur[e].iter = ITER;
-      saveAccounts(cur);
-      reset = null; pass.value = pass2.value = codeIn.value = '';
-      setMode('in');
-      say('Đổi mật khẩu thành công. Hãy đăng nhập bằng mật khẩu mới.', true);
-    });
-  }
-
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
     if (busy) return;
     say('');
     var e = norm(email.value), p = pass.value, nm = cleanName(nameIn.value), r;
-    try { r = mode === 'up' ? signup(e, p, pass2.value, nm) : mode === 'fg1' ? sendCode(nm) : mode === 'fg2' ? doReset(codeIn.value.trim(), p, pass2.value) : login(nm, p); } catch (x) { r = null; say('Trình duyệt này chưa hỗ trợ mã hóa mật khẩu. Hãy mở trang bằng Chrome hoặc Edge mới.'); }
+    try { r = mode === 'up' ? signup(e, p, pass2.value, nm) : login(nm, p); } catch (x) { r = null; say('Trình duyệt này chưa hỗ trợ mã hóa mật khẩu. Hãy mở trang bằng Chrome hoặc Edge mới.'); }
     if (r && r.then) {
       r.then(function () { setBusy(false); }, function () { setBusy(false); say('Trình duyệt này chưa hỗ trợ mã hóa mật khẩu. Hãy mở trang bằng Chrome hoặc Edge mới.'); });
     } else { setBusy(false); }
@@ -8358,8 +8269,6 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
 
   $('acct-tab-in').addEventListener('click', function () { setMode('in'); });
   $('acct-tab-up').addEventListener('click', function () { setMode('up'); });
-  $('acct-forgot').addEventListener('click', function () { setMode('fg1'); });
-  $('acct-back').addEventListener('click', function () { setMode('in'); });
   Array.prototype.forEach.call(modal.querySelectorAll('.ac-eye'), function (b) {
     b.addEventListener('click', function () {
       var i = $(b.getAttribute('data-eye')), show = i.type === 'password';
@@ -8428,5 +8337,512 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
  window.__viIdle={start:idleStart,clear:idleClear};
 })();
 </script>
+<style id="arena-css">
+#arena-modal{position:fixed;inset:0;z-index:99991;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.6);padding:16px}
+#arena-modal.open{display:flex}
+#arena-modal [hidden]{display:none!important}
+#arena-modal .ar-card{width:100%;max-width:520px;max-height:calc(100dvh - 32px);overflow:auto;background:var(--sk-surface,#fff);color:var(--sk-text,#1e293b);border:1px solid var(--sk-border,#e2e8f0);border-radius:20px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+html[data-theme="dark"]:not([data-skin]) #arena-modal .ar-card{background:#1e293b;color:#e2e8f0;border-color:#334155}
+#arena-modal .ar-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+#arena-modal h3{font-weight:800;font-size:1.1rem;margin:0}
+#arena-modal .ar-x{width:34px;height:34px;border-radius:10px;border:1px solid var(--sk-border,#cbd5e1);background:transparent;color:inherit;cursor:pointer;font-size:1rem;line-height:1}
+#arena-modal .ar-hero{text-align:center;padding:6px 4px 14px}
+#arena-modal .ar-ico{font-size:2.6rem;line-height:1}
+#arena-modal .ar-hero h4{font-weight:800;font-size:1.15rem;margin:8px 0 6px}
+#arena-modal .ar-hero p,#arena-modal .ar-note{font-size:.85rem;opacity:.75;line-height:1.5;margin:0}
+#arena-modal .ar-note{font-size:.76rem;opacity:.65;margin-top:12px;text-align:center}
+#arena-modal .ar-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 16px}
+#arena-modal .ar-stats div{display:flex;flex-direction:column;align-items:center;padding:10px 4px;border-radius:14px;background:var(--sk-surface2,#f1f5f9)}
+html[data-theme="dark"]:not([data-skin]) #arena-modal .ar-stats div,html[data-theme="dark"]:not([data-skin]) #arena-modal .ar-pl{background:#0f172a}
+#arena-modal .ar-stats b{font-size:1.15rem;font-weight:800}
+#arena-modal .ar-stats span{font-size:.72rem;opacity:.65;font-weight:600}
+#arena-modal .ar-btn{display:block;width:100%;padding:12px 16px;border-radius:12px;border:0;font-weight:800;font-size:.95rem;cursor:pointer;background:var(--sk-grad,linear-gradient(135deg,#2563eb,#7c3aed));color:var(--sk-on,#fff)}
+#arena-modal .ar-btn.ghost{background:transparent;color:inherit;border:1px solid var(--sk-border,#cbd5e1);margin-top:8px}
+#arena-modal .ar-find{text-align:center;padding:10px 0 4px}
+#arena-modal .ar-spin{width:54px;height:54px;margin:0 auto 14px;border-radius:50%;border:5px solid var(--sk-border,#e2e8f0);border-top-color:var(--sk-accent,#2563eb);animation:arspin 1s linear infinite}
+@keyframes arspin{to{transform:rotate(360deg)}}
+#arena-modal .ar-count{font-size:2.4rem;font-weight:800;line-height:1;margin:2px 0 8px}
+#arena-modal .ar-vs{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 0;font-weight:800}
+#arena-modal .ar-vs .ar-p{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;max-width:40%;text-align:center;overflow-wrap:anywhere;font-size:.9rem}
+#arena-modal .ar-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:var(--sk-grad,linear-gradient(135deg,#2563eb,#7c3aed));color:var(--sk-on,#fff)}
+#arena-modal .ar-vs i{font-style:normal;font-size:1.3rem;opacity:.7}
+#arena-modal .ar-pls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+#arena-modal .ar-pl{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-radius:14px;background:var(--sk-surface2,#f1f5f9);min-width:0}
+#arena-modal .ar-pl span{font-size:.78rem;font-weight:700;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#arena-modal .ar-pl b{font-size:1.15rem;font-weight:800}
+#arena-modal .ar-meta{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;font-weight:700;opacity:.8;margin-bottom:6px;min-height:1.2em}
+#arena-modal .ar-bar{height:8px;border-radius:99px;background:var(--sk-surface2,#e2e8f0);overflow:hidden;margin-bottom:14px}
+html[data-theme="dark"]:not([data-skin]) #arena-modal .ar-bar{background:#0f172a}
+#arena-modal .ar-bar i{display:block;height:100%;width:100%;border-radius:99px;background:var(--sk-grad,linear-gradient(135deg,#2563eb,#7c3aed))}
+#arena-modal .ar-bar i.low{background:#ef4444}
+#arena-modal .ar-q{font-weight:800;font-size:1.05rem;line-height:1.45;margin-bottom:14px}
+#arena-modal .ar-opts{display:grid;gap:8px}
+#arena-modal .ar-opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 12px;border-radius:12px;border:1px solid var(--sk-border,#cbd5e1);background:transparent;color:inherit;font-size:.92rem;font-weight:600;cursor:pointer}
+#arena-modal .ar-opt:hover:not(:disabled){border-color:var(--sk-accent,#2563eb)}
+#arena-modal .ar-opt b{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.78rem;background:var(--sk-surface2,#f1f5f9)}
+html[data-theme="dark"]:not([data-skin]) #arena-modal .ar-opt b{background:#0f172a}
+#arena-modal .ar-opt:disabled{cursor:default}
+#arena-modal .ar-opt.ok{border-color:#22c55e;background:rgba(34,197,94,.15)}
+#arena-modal .ar-opt.bad{border-color:#ef4444;background:rgba(239,68,68,.13)}
+#arena-modal .ar-opt.dim{opacity:.5}
+#arena-modal .ar-why{margin-top:12px;padding:10px 12px;border-radius:12px;font-size:.83rem;line-height:1.5;background:var(--sk-surface2,#f1f5f9)}
+html[data-theme="dark"]:not([data-skin]) #arena-modal .ar-why{background:#0f172a}
+#arena-modal .ar-res{text-align:center;padding:4px 0 10px}
+#arena-modal .ar-res .ar-ico{font-size:3rem}
+#arena-modal .ar-res h4{font-weight:800;font-size:1.3rem;margin:8px 0 4px}
+#arena-modal .ar-sc{display:flex;justify-content:center;gap:18px;align-items:flex-end;margin:14px 0 6px}
+#arena-modal .ar-sc div{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;max-width:42%}
+#arena-modal .ar-sc b{font-size:1.7rem;font-weight:800;line-height:1}
+#arena-modal .ar-sc span{font-size:.76rem;opacity:.7;font-weight:700;overflow-wrap:anywhere;text-align:center}
+</style>
+
+<div id="arena-modal" role="dialog" aria-modal="true" aria-labelledby="arena-title">
+  <div class="ar-card">
+    <div class="ar-head">
+      <h3 id="arena-title">⚔️ Đấu trường</h3>
+      <button type="button" class="ar-x" id="arena-close" aria-label="Đóng">✕</button>
+    </div>
+    <div id="arena-body"></div>
+  </div>
+</div>
+
+<script id="trace-arena">
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+  var SK = 'trace_arena_v1', QN = 7, QT = 15000, FIND_MS = 10000, SLOTS = 4, PREFIX = 'trace-arena-v1-slot-';
+  var PEER_SRC = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+  var BOTS = ['Minh Anh', 'Gia Bảo', 'Thu Hà', 'Quốc Khánh', 'Ngọc Lan', 'Đức Anh', 'Phương Linh', 'Tuấn Kiệt'];
+
+  /* Ngân hàng câu hỏi: [câu hỏi, 4 đáp án, chỉ số đáp án đúng, giải thích] */
+  var BANK = [
+    ['She ___ to school every day.', ['go', 'goes', 'going', 'gone'], 1, 'Chủ ngữ ngôi thứ ba số ít (she) ở thì hiện tại đơn thêm -s/-es: goes.'],
+    ['I ___ a book when the phone rang.', ['read', 'was reading', 'am reading', 'have read'], 1, 'Hành động đang diễn ra thì bị cắt ngang trong quá khứ → quá khứ tiếp diễn: was reading.'],
+    ['If it rains tomorrow, we ___ at home.', ['stay', 'stayed', 'will stay', 'would stay'], 2, 'Câu điều kiện loại 1: If + hiện tại đơn, S + will + V.'],
+    ['My brother is ___ than me.', ['tall', 'taller', 'tallest', 'more tall'], 1, 'Tính từ ngắn dùng so sánh hơn: tall → taller (+ than).'],
+    ['They have lived here ___ 2015.', ['for', 'since', 'during', 'from'], 1, 'Since + mốc thời gian (2015); for + khoảng thời gian.'],
+    ["There isn't ___ milk in the fridge.", ['some', 'any', 'many', 'a few'], 1, 'Câu phủ định với danh từ không đếm được dùng any.'],
+    ["I'm interested ___ learning Japanese.", ['on', 'at', 'in', 'for'], 2, 'Be interested in + V-ing/danh từ.'],
+    ['The letter ___ yesterday.', ['wrote', 'was written', 'is written', 'has written'], 1, 'Câu bị động quá khứ đơn: was/were + V3 (yesterday).'],
+    ['Neither Tom nor his friends ___ coming.', ['is', 'are', 'was', 'be'], 1, 'Với neither…nor, động từ chia theo chủ ngữ gần nhất (his friends → are).'],
+    ['I wish I ___ a car.', ['have', 'had', 'would have', 'am having'], 1, 'Wish ở hiện tại (điều không có thật) dùng quá khứ đơn: had.'],
+    ['She is good ___ playing the piano.', ['at', 'in', 'on', 'with'], 0, 'Be good at + V-ing.'],
+    ['By the time we arrived, the film ___.', ['already started', 'has already started', 'had already started', 'was already starting'], 2, 'Hành động xảy ra trước một mốc trong quá khứ → quá khứ hoàn thành: had started.'],
+    ['How ___ water do you drink a day?', ['many', 'much', 'few', 'lot'], 1, 'Water là danh từ không đếm được → how much.'],
+    ['He stayed at home ___ it was raining.', ['because', 'so', 'although', 'but'], 0, 'Because + mệnh đề chỉ nguyên nhân.'],
+    ['This is the ___ movie I have ever seen.', ['good', 'better', 'best', 'most good'], 2, 'So sánh nhất: the best (bất quy tắc: good – better – best).'],
+    ['You ___ smoke here. It is forbidden.', ['must', "mustn't", "needn't", "don't have to"], 1, "Mustn't = cấm đoán."],
+    ['We ___ English for five years.', ['learn', 'are learning', 'have been learning', 'learned'], 2, 'For five years (kéo dài đến hiện tại) → hiện tại hoàn thành tiếp diễn: have been learning.'],
+    ['The man ___ lives next door is a doctor.', ['who', 'which', 'whose', 'whom'], 0, 'Who thay cho người, làm chủ ngữ trong mệnh đề quan hệ.'],
+    ['I look forward to ___ you soon.', ['see', 'seeing', 'saw', 'seen'], 1, 'Look forward to + V-ing (to là giới từ).'],
+    ['She suggested ___ to the cinema.', ['go', 'to go', 'going', 'went'], 2, 'Suggest + V-ing.'],
+    ['Would you mind ___ the window?', ['open', 'to open', 'opening', 'opened'], 2, 'Would you mind + V-ing?'],
+    ['He is not old enough ___ a car.', ['drive', 'to drive', 'driving', 'driven'], 1, 'Adj + enough + to V.'],
+    ['My mother is ___ honest woman.', ['a', 'an', 'the', 'no article'], 1, 'Honest bắt đầu bằng âm nguyên âm (h câm) → an.'],
+    ['___ Pacific Ocean is the largest ocean.', ['A', 'An', 'The', 'No article'], 2, 'Tên đại dương dùng the.'],
+    ['I have never ___ sushi.', ['eat', 'ate', 'eaten', 'eating'], 2, 'Have/has + V3: eaten.'],
+    ['Look! It ___ now.', ['rains', 'is raining', 'rained', 'rain'], 1, '"Look!/now" → hiện tại tiếp diễn: is raining.'],
+    ['If I ___ you, I would study harder.', ['am', 'was', 'were', 'be'], 2, 'Điều kiện loại 2: If + S + were/V2, S + would + V.'],
+    ['He ___ his keys yesterday.', ['lose', 'lost', 'loses', 'has lost'], 1, 'Yesterday → quá khứ đơn: lost.'],
+    ['Each of the students ___ a book.', ['have', 'has', 'are having', 'were'], 1, 'Each of + danh từ số nhiều → động từ số ít: has.'],
+    ['I have ___ finished my homework.', ['yet', 'already', 'ever', 'since'], 1, 'Already dùng trong câu khẳng định ở hiện tại hoàn thành.'],
+    ["She doesn't have ___ friends here.", ['much', 'a lot', 'many', 'little'], 2, 'Friends đếm được số nhiều, câu phủ định → many.'],
+    ['Tom is the ___ student in our class.', ['more intelligent', 'most intelligent', 'intelligenter', 'intelligentest'], 1, 'Tính từ dài so sánh nhất: the most + adj.'],
+    ['She sings ___ than her sister.', ['good', 'well', 'better', 'best'], 2, 'So sánh hơn của well là better.'],
+    ["I'll call you as soon as I ___ home.", ['get', 'will get', 'got', 'am getting'], 0, 'Mệnh đề thời gian (as soon as) dùng hiện tại đơn thay cho tương lai.'],
+    ['Can you tell me where ___?', ['is the station', 'the station is', 'was station', 'station is'], 1, 'Câu hỏi gián tiếp giữ trật tự câu khẳng định: where the station is.'],
+    ["It's ___ hot that I can't sleep.", ['so', 'such', 'too', 'very'], 0, 'So + adj + that…'],
+    ['He speaks English very ___.', ['fluent', 'fluently', 'fluency', 'fluents'], 1, 'Bổ nghĩa cho động từ cần trạng từ: fluently.'],
+    ['Thank you ___ helping me.', ['to', 'for', 'at', 'with'], 1, 'Thank you for + V-ing.'],
+    ['The film was so ___ that I almost fell asleep.', ['bored', 'boring', 'bore', 'boredom'], 1, 'Adj-ing mô tả tính chất của sự vật: boring.'],
+    ['I was ___ when I heard the bad news.', ['shock', 'shocking', 'shocked', 'shocks'], 2, 'Adj-ed mô tả cảm xúc của người: shocked.'],
+    ['Not only ___ she sing well, but she also dances.', ['does', 'do', 'is', 'has'], 0, 'Đảo ngữ với Not only: does + S + V.'],
+    ["Which word means 'very big'?", ['tiny', 'huge', 'narrow', 'quiet'], 1, 'Huge = rất to lớn.'],
+    ["The opposite of 'ancient' is ___.", ['old', 'modern', 'dirty', 'tall'], 1, 'Ancient (cổ xưa) ↔ modern (hiện đại).'],
+    ['A person who writes books is called an ___.', ['author', 'actor', 'engineer', 'farmer'], 0, 'Author = tác giả.'],
+    ["To 'postpone' a meeting means to ___ it.", ['cancel', 'delay', 'start', 'finish'], 1, 'Postpone = hoãn lại (delay).'],
+    ["'Exhausted' is closest in meaning to ___.", ['very tired', 'very happy', 'very angry', 'very hungry'], 0, 'Exhausted = kiệt sức, rất mệt.'],
+    ['You should ___ your homework before you go out.', ['make', 'do', 'take', 'have'], 1, 'Collocation: do homework.'],
+    ['Please ___ attention to the teacher.', ['make', 'give', 'pay', 'take'], 2, 'Collocation: pay attention.'],
+    ["I'm going to ___ a shower.", ['do', 'make', 'take', 'put'], 2, 'Collocation: take a shower.'],
+    ['She ___ a mistake in the test.', ['did', 'made', 'took', 'put'], 1, 'Collocation: make a mistake.'],
+    ["The synonym of 'begin' is ___.", ['finish', 'start', 'stop', 'continue'], 1, 'Begin = start.'],
+    ['A ___ is a place where you can borrow books.', ['bakery', 'library', 'pharmacy', 'stadium'], 1, 'Library = thư viện.'],
+    ['He is very ___; he never tells lies.', ['honest', 'lazy', 'rude', 'shy'], 0, 'Honest = trung thực.'],
+    ["If something is 'expensive', it costs a lot of ___.", ['time', 'money', 'space', 'noise'], 1, 'Expensive = đắt, tốn nhiều tiền.'],
+    ['Which thing protects you from the rain?', ['umbrella', 'pillow', 'mirror', 'ladder'], 0, 'Umbrella = cái ô.'],
+    ['The ___ of Vietnam is Hanoi.', ['capital', 'island', 'village', 'border'], 0, 'Capital = thủ đô.'],
+    ["'Delicious' means ___.", ['tasting very good', 'smelling bad', 'looking old', 'sounding loud'], 0, 'Delicious = ngon.'],
+    ['My grandfather is 80, so he is quite ___.', ['elderly', 'junior', 'fresh', 'tiny'], 0, 'Elderly = lớn tuổi.'],
+    ["The opposite of 'generous' is ___.", ['kind', 'selfish', 'polite', 'cheerful'], 1, 'Generous (hào phóng) ↔ selfish (ích kỷ).'],
+    ['Please turn ___ the light when you leave.', ['on', 'off', 'up', 'in'], 1, 'Turn off = tắt.'],
+    ["I'm looking ___ my keys. Have you seen them?", ['at', 'for', 'after', 'up'], 1, 'Look for = tìm kiếm.'],
+    ['She takes ___ her mother; they look alike.', ['after', 'over', 'up', 'on'], 0, 'Take after = giống (người thân).'],
+    ["Don't give ___! Keep trying.", ['in', 'up', 'out', 'off'], 1, 'Give up = bỏ cuộc.'],
+    ['The match was called ___ because of the storm.', ['off', 'on', 'up', 'in'], 0, 'Call off = hủy bỏ.'],
+    ['We ran ___ of milk, so I went to the shop.', ['out', 'off', 'away', 'up'], 0, 'Run out of = hết.'],
+    ['He gets ___ well with his classmates.', ['on', 'in', 'to', 'at'], 0, 'Get on well with = hòa thuận với.'],
+    ['The plane takes ___ at 6 a.m.', ['off', 'out', 'away', 'down'], 0, 'Take off = cất cánh.'],
+    ["I'm afraid ___ spiders.", ['of', 'from', 'at', 'with'], 0, 'Be afraid of.']
+  ];
+
+  /* ---------- tiện ích ---------- */
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function shuffle(arr, r) {
+    for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)); var t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+    return arr;
+  }
+  // Cùng một seed → cùng bộ câu hỏi và cùng thứ tự đáp án ở cả hai máy.
+  function pick(seed) {
+    var r = rng(seed), idx = shuffle(BANK.map(function (_, i) { return i; }), r).slice(0, QN);
+    return idx.map(function (bi) {
+      var b = BANK[bi];
+      var o = shuffle(b[1].map(function (t, k) { return { t: t, c: k === b[2] }; }), r);
+      return { q: b[0], o: o, why: b[3] };
+    });
+  }
+  function stats(u) {
+    try { var all = JSON.parse(window.store.get(SK) || '{}') || {}; var s = all[u]; if (s) return s; } catch (e) {}
+    return { w: 0, l: 0, d: 0, p: 0 };
+  }
+  function record(u, res, pts) {
+    var all = {};
+    try { all = JSON.parse(window.store.get(SK) || '{}') || {}; } catch (e) {}
+    var s = all[u] || { w: 0, l: 0, d: 0, p: 0 };
+    s[res] = (s[res] || 0) + 1; s.p = (s.p || 0) + pts;
+    all[u] = s;
+    window.store.set(SK, JSON.stringify(all));
+  }
+
+  /* ---------- Tìm đối thủ thật (PeerJS, kết nối trực tiếp giữa 2 máy) ---------- */
+  function loadPeer(cb) {
+    if (typeof window.Peer === 'function') return cb(true);
+    var done = false, sc = document.createElement('script');
+    function fin(v) { if (!done) { done = true; cb(v); } }
+    sc.src = PEER_SRC; sc.async = true;
+    sc.onload = function () { fin(typeof window.Peer === 'function'); };
+    sc.onerror = function () { fin(false); };
+    document.head.appendChild(sc);
+  }
+
+  // Mỗi "ô chờ" là một ID cố định. Ai đăng ký được ô nào thì ngồi chờ ở ô đó,
+  // ai thấy ô đã có người thì kết nối vào làm khách. Ô đang bận → thử ô kế tiếp.
+  function search(me, onMatch) {
+    var st = { dead: false, matched: false, pending: false, peer: null };
+    function kill() { st.dead = true; if (!st.matched) { try { st.peer && st.peer.destroy(); } catch (e) {} } }
+
+    function tryHost(i) {
+      if (st.dead) return;
+      if (i >= SLOTS) { setTimeout(function () { tryHost(0); }, 1200); return; }
+      var p;
+      try { p = new window.Peer(PREFIX + i, { debug: 0 }); } catch (e) { return; }
+      st.peer = p;
+      var opened = false;
+      p.on('open', function () { opened = true; if (st.dead) { try { p.destroy(); } catch (e) {} } });
+      p.on('disconnected', function () { if (!st.dead) { try { p.reconnect(); } catch (e) {} } });
+      p.on('connection', function (conn) {
+        conn.on('open', function () {
+          if (st.dead || st.matched || st.pending) { try { conn.send({ t: 'busy' }); } catch (e) {} setTimeout(function () { try { conn.close(); } catch (e) {} }, 300); return; }
+          st.pending = true;
+          var seed = (Math.random() * 4294967296) >>> 0, timer;
+          function drop() { clearTimeout(timer); if (!st.matched) { st.pending = false; try { conn.close(); } catch (e) {} } }
+          timer = setTimeout(drop, 3000);
+          conn.on('data', function (m) {
+            if (m && m.t === 'hello' && st.pending && !st.matched && !st.dead) {
+              clearTimeout(timer); st.matched = true; st.pending = false;
+              try { conn.send({ t: 'go' }); } catch (e) {}
+              onMatch({ role: 'host', conn: conn, peer: p, seed: seed, oppName: String(m.name || 'Đối thủ').slice(0, 20) });
+            }
+          });
+          conn.on('close', function () { if (!st.matched) drop(); });
+          try { conn.send({ t: 'welcome', name: me.name, seed: seed }); } catch (e) { drop(); }
+        });
+      });
+      p.on('error', function (err) {
+        if (st.dead) return;
+        try { p.destroy(); } catch (e) {}
+        if (err && err.type === 'unavailable-id') joinSlot(i);
+        else setTimeout(function () { if (!st.dead && !st.matched) tryHost(i); }, 1500);
+      });
+    }
+
+    function joinSlot(i) {
+      if (st.dead) return;
+      var p;
+      try { p = new window.Peer(undefined, { debug: 0 }); } catch (e) { return; }
+      st.peer = p;
+      var done = false, welcome = null, to = setTimeout(next, 3000);
+      function next() { if (done) return; done = true; clearTimeout(to); try { p.destroy(); } catch (e) {} if (!st.dead) tryHost(i + 1); }
+      p.on('error', next);
+      p.on('open', function () {
+        if (st.dead) { try { p.destroy(); } catch (e) {} return; }
+        var conn = p.connect(PREFIX + i, { reliable: true });
+        conn.on('error', next);
+        conn.on('close', function () { if (!st.matched) next(); });
+        conn.on('data', function (m) {
+          if (done || !m) return;
+          if (m.t === 'busy') return next();
+          if (m.t === 'welcome' && !welcome) {
+            welcome = m; clearTimeout(to); to = setTimeout(next, 3000);
+            try { conn.send({ t: 'hello', name: me.name }); } catch (e) { next(); }
+          } else if (m.t === 'go' && welcome && !st.dead) {
+            done = true; st.matched = true; clearTimeout(to);
+            onMatch({ role: 'guest', conn: conn, peer: p, seed: welcome.seed >>> 0, oppName: String(welcome.name || 'Đối thủ').slice(0, 20) });
+          }
+        });
+      });
+    }
+
+    loadPeer(function (ok) { if (ok && !st.dead) tryHost(0); });
+    return { cancel: kill };
+  }
+
+  /* ---------- Trạng thái ---------- */
+  var ME = null, F = null, G = null;
+  function body(h) { $('arena-body').innerHTML = h; }
+  function later(fn, ms) { var t = setTimeout(fn, ms); if (G) G.timers.push(t); return t; }
+
+  function loginView() {
+    body('<div class="ar-hero"><div class="ar-ico">🔒</div><h4>Cần đăng nhập</h4><p>Đấu trường dành cho học sinh có tài khoản. Hãy đăng nhập hoặc tạo tài khoản để thi đấu.</p></div>' +
+      '<button type="button" class="ar-btn" data-act="login">Đăng nhập / Tạo tài khoản</button>');
+  }
+  function homeView() {
+    var s = stats(ME.u);
+    body('<div class="ar-hero"><div class="ar-ico">⚔️</div><h4>Đấu tay đôi tiếng Anh</h4><p>' + QN + ' câu · ' + (QT / 1000) + ' giây mỗi câu. Trả lời đúng và nhanh để được nhiều điểm hơn (100–150 điểm/câu). Ai nhiều điểm hơn sẽ thắng.</p></div>' +
+      '<div class="ar-stats"><div><b>' + (s.w || 0) + '</b><span>Thắng</span></div><div><b>' + (s.d || 0) + '</b><span>Hòa</span></div><div><b>' + (s.l || 0) + '</b><span>Thua</span></div><div><b>' + (s.p || 0) + '</b><span>Điểm</span></div></div>' +
+      '<button type="button" class="ar-btn" data-act="find">Tìm đối thủ</button>' +
+      '<p class="ar-note">Bạn thi đấu với tên <b>' + esc(ME.name) + '</b>. Nếu sau ' + (FIND_MS / 1000) + ' giây chưa có bạn nào cùng tìm trận, bạn sẽ đấu với Bot.</p>');
+  }
+
+  function stopFind() {
+    if (!F) return;
+    clearInterval(F.iv);
+    if (F.net) F.net.cancel();
+    F = null;
+  }
+  function findView() {
+    body('<div class="ar-find"><div class="ar-spin"></div><div class="ar-count" id="ar-cd">' + (FIND_MS / 1000) + '</div>' +
+      '<p class="ar-hero" style="margin:0"><b>Đang tìm đối thủ…</b></p>' +
+      '<p class="ar-note" style="margin-top:6px">Không có ai sau ' + (FIND_MS / 1000) + ' giây bạn sẽ đấu với Bot.</p></div>' +
+      '<button type="button" class="ar-btn ghost" data-act="cancel">Hủy</button>');
+  }
+  function startFind() {
+    stopFind();
+    findView();
+    var f = F = { t0: Date.now(), iv: 0, net: null };
+    f.net = search(ME, function (link) {
+      if (F !== f) { try { link.conn.close(); link.peer.destroy(); } catch (e) {} return; }
+      f.net = null; stopFind();
+      beginMatch(link.seed, { name: link.oppName, bot: false }, link);
+    });
+    f.iv = setInterval(function () {
+      if (F !== f) return;
+      var left = Math.max(0, FIND_MS - (Date.now() - f.t0)), cd = $('ar-cd');
+      if (cd) cd.textContent = Math.ceil(left / 1000);
+      if (left <= 0) {
+        stopFind();
+        beginMatch((Math.random() * 4294967296) >>> 0, { name: BOTS[Math.floor(Math.random() * BOTS.length)], bot: true }, null);
+      }
+    }, 200);
+  }
+
+  /* ---------- Trận đấu ---------- */
+  function beginMatch(seed, opp, link) {
+    G = { qs: pick(seed), opp: opp, link: link, qi: -1, q: null, sc: { me: 0, opp: 0 }, ok: 0, oppAns: {}, oppFin: null, over: false, waiting: false, timers: [], tick: 0, acc: 0.55 + Math.random() * 0.25 };
+    var g = G;
+    if (link) {
+      link.conn.on('data', function (m) { if (G === g) onOpp(m); });
+      link.conn.on('close', function () { if (G === g) oppLeft(); });
+    }
+    body('<div class="ar-vs"><div class="ar-p"><div class="ar-av">🙂</div>' + esc(ME.name) + '</div><i>VS</i><div class="ar-p"><div class="ar-av">' + (opp.bot ? '🤖' : '🧑‍🎓') + '</div>' + esc(opp.name) + (opp.bot ? ' (Bot)' : '') + '</div></div>' +
+      '<p class="ar-note" style="margin-top:0">Chuẩn bị… trận đấu sắp bắt đầu!</p>');
+    later(nextQ, 1800);
+  }
+  function send(m) { if (G && G.link) { try { G.link.conn.send(m); } catch (e) {} } }
+
+  function oppName() { return esc(G.opp.name) + (G.opp.bot ? ' 🤖' : ''); }
+  function oppShown() {
+    var up = G.q ? (G.q.done ? G.q.i : G.q.i - 1) : QN - 1, s = 0;
+    for (var j = 0; j <= up; j++) if (G.oppAns[j]) s += G.oppAns[j].pts;
+    return s;
+  }
+  function updScores() {
+    var a = $('ar-s-me'), b = $('ar-s-op');
+    if (a) a.textContent = G.sc.me;
+    if (b) b.textContent = oppShown();
+  }
+  function updStatus() {
+    var el = $('ar-st'); if (!el || !G.q) return;
+    var q = G.q;
+    el.textContent = q.done ? '' : q.mine ? 'Đang chờ đối thủ…' : q.opp ? 'Đối thủ đã trả lời' : '';
+  }
+
+  function nextQ() {
+    if (!G || G.over) return;
+    clearInterval(G.tick);
+    G.qi++;
+    if (G.qi >= QN) return finishMine();
+    var i = G.qi, q = G.qs[i];
+    G.q = { i: i, t0: Date.now(), mine: null, opp: G.oppAns[i] || null, adv: false, done: false };
+    if (G.opp.bot) {
+      var d = 3000 + Math.random() * 8000, ok = Math.random() < G.acc;
+      later(function () { onOpp({ t: 'a', qi: i, ok: ok, pts: ok ? 100 + Math.round((1 - d / QT) * 50) : 0 }); }, d);
+    }
+    body('<div class="ar-pls"><div class="ar-pl"><span>' + esc(ME.name) + '</span><b id="ar-s-me">0</b></div><div class="ar-pl"><span>' + oppName() + '</span><b id="ar-s-op">0</b></div></div>' +
+      '<div class="ar-meta"><span>Câu ' + (i + 1) + '/' + QN + '</span><span id="ar-st"></span><span id="ar-tl">' + (QT / 1000) + 's</span></div>' +
+      '<div class="ar-bar"><i id="ar-tb"></i></div>' +
+      '<div class="ar-q">' + esc(q.q) + '</div>' +
+      '<div class="ar-opts" id="ar-opts">' + q.o.map(function (o, k) { return '<button type="button" class="ar-opt" data-act="ans" data-k="' + k + '"><b>' + 'ABCD'.charAt(k) + '</b><span>' + esc(o.t) + '</span></button>'; }).join('') + '</div>' +
+      '<div class="ar-why" id="ar-why" hidden></div>');
+    updScores(); updStatus();
+    G.tick = setInterval(tick, 100);
+  }
+  function tick() {
+    if (!G || !G.q || G.over) return;
+    var el = Date.now() - G.q.t0, left = Math.max(0, QT - el), tb = $('ar-tb'), tl = $('ar-tl');
+    if (tb) { tb.style.width = (left / QT * 100) + '%'; tb.className = left < 4000 ? 'low' : ''; }
+    if (tl) tl.textContent = Math.ceil(left / 1000) + 's';
+    if (el >= QT && !G.q.mine) lock(-1);
+    if (el >= QT + 800 && !G.q.opp) { G.q.opp = { pts: 0, ok: false }; checkAdv(); }
+  }
+  function lock(k) {
+    if (!G || !G.q || G.q.mine || G.over) return;
+    var q = G.qs[G.q.i], el = Math.min(QT, Date.now() - G.q.t0), c = k >= 0 && !!q.o[k].c;
+    var pts = c ? 100 + Math.round((1 - el / QT) * 50) : 0;
+    G.q.mine = { k: k, ok: c, pts: pts };
+    G.sc.me += pts; if (c) G.ok++;
+    send({ t: 'a', qi: G.q.i, pts: pts, ok: c });
+    var btns = document.querySelectorAll('#ar-opts .ar-opt');
+    Array.prototype.forEach.call(btns, function (b, idx) {
+      b.disabled = true;
+      b.classList.add(q.o[idx].c ? 'ok' : idx === k ? 'bad' : 'dim');
+    });
+    var w = $('ar-why');
+    if (w) { w.hidden = false; w.textContent = (c ? '✅ Chính xác! +' + pts + ' điểm. ' : k < 0 ? '⏰ Hết giờ. ' : '❌ Chưa đúng. ') + q.why; }
+    updScores(); checkAdv();
+  }
+  function checkAdv() {
+    var q = G && G.q;
+    if (!q || q.adv) return;
+    if (q.mine && q.opp) {
+      q.adv = true; q.done = true;
+      clearInterval(G.tick);
+      updScores(); updStatus();
+      var i = q.i;
+      later(function () { if (G && G.q && G.q.i === i) nextQ(); }, 1800);
+    } else updStatus();
+  }
+  function onOpp(m) {
+    if (!G || G.over || !m) return;
+    if (m.t === 'a') {
+      var qi = m.qi | 0;
+      if (qi < 0 || qi >= QN || G.oppAns[qi]) return;
+      G.oppAns[qi] = { pts: Math.max(0, Math.min(150, m.pts | 0)), ok: !!m.ok };
+      if (G.q && G.q.i === qi && !G.q.opp) { G.q.opp = G.oppAns[qi]; checkAdv(); }
+    } else if (m.t === 'fin') {
+      G.oppFin = Math.max(0, Math.min(QN * 150, m.score | 0));
+      if (G.waiting) finalize(G.oppFin);
+    } else if (m.t === 'bye') oppLeft();
+  }
+  function sumOpp() { var s = 0; for (var j = 0; j < QN; j++) if (G.oppAns[j]) s += G.oppAns[j].pts; return s; }
+
+  function finishMine() {
+    G.q = null;
+    if (G.opp.bot) return finalize(sumOpp());
+    send({ t: 'fin', score: G.sc.me });
+    if (G.oppFin != null) return finalize(G.oppFin);
+    G.waiting = true;
+    body('<div class="ar-find"><div class="ar-spin"></div><p class="ar-hero" style="margin:0"><b>Bạn đã xong! Đang chờ đối thủ hoàn thành…</b></p></div>');
+    later(function () { if (G && !G.over) finalize(sumOpp()); }, 20000);
+  }
+  function endLink(g) {
+    if (!g.link) return;
+    setTimeout(function () { try { g.link.conn.close(); } catch (e) {} try { g.link.peer.destroy(); } catch (e) {} }, 2000);
+  }
+  function finalize(opT, note, forceWin) {
+    if (!G || G.over) return;
+    var g = G, me = g.sc.me, res = forceWin ? 'w' : me > opT ? 'w' : me < opT ? 'l' : 'd';
+    g.over = true; g.waiting = false; clearInterval(g.tick);
+    g.timers.forEach(clearTimeout);
+    record(ME.u, res, me);
+    endLink(g);
+    var title = res === 'w' ? 'Bạn thắng!' : res === 'l' ? 'Bạn thua rồi' : 'Hòa nhau!';
+    var ico = res === 'w' ? '🏆' : res === 'l' ? '💪' : '🤝';
+    body('<div class="ar-res"><div class="ar-ico">' + ico + '</div><h4>' + title + '</h4>' +
+      '<p class="ar-note" style="margin:0">' + (note ? esc(note) + ' ' : '') + 'Bạn trả lời đúng ' + g.ok + '/' + QN + ' câu.</p>' +
+      '<div class="ar-sc"><div><b>' + me + '</b><span>' + esc(ME.name) + '</span></div><div style="padding-bottom:6px;opacity:.6">–</div><div><b>' + opT + '</b><span>' + esc(g.opp.name) + (g.opp.bot ? ' (Bot)' : '') + '</span></div></div></div>' +
+      '<button type="button" class="ar-btn" data-act="find">Đấu lại</button>' +
+      '<button type="button" class="ar-btn ghost" data-act="home">Về Đấu trường</button>');
+  }
+  function oppLeft() {
+    if (!G || G.over || G.oppFin != null) return;
+    finalize(sumOpp(), 'Đối thủ đã rời trận.', true);
+  }
+
+  /* ---------- Mở / đóng ---------- */
+  function inMatch() { return !!(G && !G.over); }
+  function leaveMatch() {
+    var g = G; if (!g) return;
+    if (!g.over) {
+      g.over = true; send({ t: 'bye' });
+      record(ME.u, 'l', g.sc.me);
+      clearInterval(g.tick); g.timers.forEach(clearTimeout);
+      endLink(g);
+    }
+    G = null;
+  }
+  function open() {
+    var a = window.traceAuth, u = a && a.user();
+    $('arena-modal').classList.add('open');
+    if (inMatch()) return;
+    if (!u) { ME = null; return loginView(); }
+    ME = { u: u, name: (a.name() || u.split('@')[0]) };
+    homeView();
+  }
+  function close() {
+    if (inMatch()) {
+      if (!window.confirm('Rời trận lúc này sẽ tính là thua. Bạn vẫn muốn thoát?')) return;
+      leaveMatch();
+    }
+    stopFind(); G = null;
+    $('arena-modal').classList.remove('open');
+  }
+
+  $('arena-btn').addEventListener('click', open);
+  $('arena-close').addEventListener('click', close);
+  $('arena-modal').addEventListener('click', function (e) { if (e.target === this) close(); });
+  $('arena-body').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]'); if (!b) return;
+    var a = b.getAttribute('data-act');
+    if (a === 'find') { G = null; startFind(); }
+    else if (a === 'cancel') { stopFind(); homeView(); }
+    else if (a === 'home') { G = null; homeView(); }
+    else if (a === 'login') { close(); var ab = $('acct-btn'); if (ab) ab.click(); }
+    else if (a === 'ans') lock(parseInt(b.getAttribute('data-k'), 10));
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!$('arena-modal').classList.contains('open')) return;
+    if (e.key === 'Escape') { close(); return; }
+    if (G && G.q && !G.q.mine && !G.over && e.key.length === 1) {
+      var k = '1234'.indexOf(e.key); if (k < 0) k = 'abcd'.indexOf(e.key.toLowerCase());
+      if (k >= 0) lock(k);
+    }
+  });
+  window.addEventListener('beforeunload', function () { if (inMatch()) send({ t: 'bye' }); });
+
+  window.traceArena = { open: open, _bank: BANK, _pick: pick };
+})();
+</script>
+
 </body>
 </html>
