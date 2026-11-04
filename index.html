@@ -8854,13 +8854,6 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
 #arena-modal .ar-rows div{display:flex;justify-content:space-between;gap:10px;font-size:.95rem;color:#94a3b8;font-weight:600}
 #arena-modal .ar-rows b{color:#fff;font-weight:800}
 #arena-modal .ar-rows .g{color:#34d399}#arena-modal .ar-rows .r{color:#fb7185}#arena-modal .ar-rows .y{color:#fbbf24}
-#arena-modal .ar-tk{border-color:rgba(251,191,36,.45);padding:14px 18px;border-radius:26px}
-#arena-modal .ar-tk .t{display:flex;justify-content:space-between;font-weight:900;color:#fbbf24;font-size:1.05rem;margin-bottom:8px}
-#arena-modal .ar-tk .t span:last-child{color:#fff}
-#arena-modal .ar-tkb{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-#arena-modal .ar-tkb i{height:12px;border-radius:99px;background:rgba(251,191,36,.18)}
-#arena-modal .ar-tkb i.on{background:linear-gradient(90deg,#fbbf24,#f59e0b);box-shadow:0 0 12px rgba(251,191,36,.6)}
-#arena-modal .ar-tk p{margin:8px 0 0;font-size:.85rem;color:#94a3b8;font-weight:600}
 #arena-modal .ar-go{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;min-height:240px}
 #arena-modal .ar-bolt{width:190px;height:190px;border-radius:50%;border:0;cursor:pointer;font-size:5rem;line-height:1;background:radial-gradient(circle,#1a1030 0,#1a1030 52%,#7a2e08 53%,#e07b1a 58%,#ffb347 61%,#a8480c 67%,#4a1d06 74%,transparent 75%);box-shadow:0 0 70px rgba(255,140,0,.4);animation:arPulse 2.4s ease-in-out infinite;transition:transform .15s}
 #arena-modal .ar-bolt:hover{transform:scale(1.05)}
@@ -8949,6 +8942,16 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
 #arena-modal .ar-sc span{font-size:.76rem;opacity:.7;font-weight:700;overflow-wrap:anywhere;text-align:center}
 #arena-modal .ar-elo{display:inline-block;margin:10px 0 14px;padding:8px 18px;border-radius:99px;border:1.5px solid rgba(34,211,238,.45);font-weight:900;font-size:1rem;background:rgba(8,28,52,.8)}
 #arena-modal .ar-elo.up{color:#34d399}#arena-modal .ar-elo.dn{color:#fb7185}
+#arena-modal .ar-ol{display:grid;gap:8px;max-height:260px;overflow:auto;padding-right:4px}
+#arena-modal .ar-or{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:16px;background:rgba(8,20,42,.8);border:1px solid rgba(34,211,238,.2);font-weight:700;font-size:.9rem;min-width:0}
+#arena-modal .ar-or .ar-sa{width:34px;height:34px;border-width:2px;font-size:.8rem;flex:none}
+#arena-modal .ar-or .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#arena-modal .ar-or small{color:#4cc9f0;font-weight:800}
+#arena-modal .ar-chal{flex:none;padding:7px 12px;border-radius:99px;border:0;font-weight:800;font-size:.78rem;cursor:pointer;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff}
+#arena-modal .ar-chal:disabled{filter:grayscale(.9);opacity:.5;cursor:not-allowed}
+#arena-modal .ar-inv{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(2,6,16,.75)}
+#arena-modal .ar-invc{width:100%;max-width:360px;padding:24px;border:2px solid rgba(251,191,36,.6);border-radius:24px;background:#07152e;text-align:center;box-shadow:0 0 30px rgba(251,191,36,.25)}
+#arena-modal .ar-invc h4{margin:8px 0 6px;font-weight:800;font-size:1.15rem;color:#fff}
 #arena-modal>*{flex-shrink:0}
 @media(max-width:980px){#arena-modal .ar-main{flex:none}#arena-modal .ar-lobby{flex:none;display:flex;flex-direction:column;gap:16px;padding:14px 14px 28px}#arena-modal .ar-col{flex:none;gap:16px}#arena-modal .ar-c.grow{flex:none}#arena-modal .ar-go{flex:none;min-height:0;padding:10px 0 18px}#arena-modal .ar-bolt{width:150px;height:150px;font-size:4rem}#arena-modal .ar-rows{margin-top:16px}#arena-modal .ar-pav{width:116px;height:116px;margin-top:14px}#arena-modal .ar-rating{font-size:2.8rem}#arena-modal .ar-c{padding:16px;border-radius:24px}#arena-modal .ar-c h4{font-size:1.1rem}#arena-modal .ar-top{padding:10px 12px;gap:8px}#arena-modal .ar-tt h3{font-size:1.05rem;letter-spacing:.08em}#arena-modal .ar-tt p{display:none}#arena-modal .ar-back{padding:9px 14px}#arena-modal .ar-back span{display:none}#arena-modal .ar-ic{width:40px;height:40px}#arena-modal .ar-stage{margin:14px;width:auto;max-width:none;padding:16px}#arena-modal .ar-pod{min-height:150px}}
 </style>
@@ -8970,7 +8973,7 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
-  var SK = 'trace_arena_v1', QN = 7, QT = 15000, FIND_MS = 10000, SLOTS = 4, PREFIX = 'trace-arena-v1-slot-';
+  var SK = 'trace_arena_v1', QN = 7, QT = 15000, FIND_MS = 10000;
   var PEER_SRC = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
   var BOTS = ['Minh Anh', 'Gia Bảo', 'Thu Hà', 'Quốc Khánh', 'Ngọc Lan', 'Đức Anh', 'Phương Linh', 'Tuấn Kiệt'];
 
@@ -9070,37 +9073,22 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
       return { q: b[0], o: o, why: b[3] };
     });
   }
-  /* ---------- Điểm ELO, vé, lịch sử ---------- */
-  var START_R = 1000, TK_MAX = 3, TK_REGEN = 20 * 60000;
+  /* ---------- Điểm ELO, lịch sử ---------- */
+  var START_R = 1000;
   function allStats() { try { return JSON.parse(window.store.get(SK) || '{}') || {}; } catch (e) { return {}; } }
   function normS(s) {
     s = s || {};
     var r = typeof s.r === 'number' && isFinite(s.r) ? s.r : START_R;
     return { w: s.w | 0, l: s.l | 0, d: s.d | 0, p: s.p | 0, r: r, pk: Math.max(r, typeof s.pk === 'number' ? s.pk : r), st: s.st | 0, bs: s.bs | 0,
-      h: Array.isArray(s.h) ? s.h : [], tk: typeof s.tk === 'number' ? Math.max(0, Math.min(TK_MAX, s.tk | 0)) : TK_MAX, tt: s.tt || 0, n: s.n || '' };
+      h: Array.isArray(s.h) ? s.h : [], n: s.n || '' };
   }
   function stats(u) { return normS(allStats()[u]); }
   function putStats(u, s) { var all = allStats(); all[u] = s; window.store.set(SK, JSON.stringify(all)); }
-  function regen(s) {
-    var now = Date.now();
-    if (s.tk >= TK_MAX) { s.tk = TK_MAX; s.tt = now; return s; }
-    if (!s.tt) s.tt = now;
-    while (s.tk < TK_MAX && now - s.tt >= TK_REGEN) { s.tk++; s.tt += TK_REGEN; }
-    if (s.tk >= TK_MAX) s.tt = now;
-    return s;
-  }
-  function useTicket(u) {
-    var s = regen(stats(u));
-    if (s.tk <= 0) return false;
-    if (s.tk >= TK_MAX) s.tt = Date.now();
-    s.tk--; putStats(u, s); return true;
-  }
-  function refundTicket(u) { var s = regen(stats(u)); s.tk = Math.min(TK_MAX, s.tk + 1); putStats(u, s); }
   function rankOf(r) {
     return r >= 1500 ? { n: 'Kim cương', c: '#67e8f9' } : r >= 1300 ? { n: 'Bạch kim', c: '#a5b4fc' } : r >= 1100 ? { n: 'Vàng', c: '#fbbf24' } : r >= 900 ? { n: 'Bạc', c: '#cbd5e1' } : { n: 'Đồng', c: '#fb923c' };
   }
   function record(u, res, pts, oppR, ok, name) {
-    var s = regen(stats(u));
+    var s = stats(u);
     s[res] = (s[res] || 0) + 1; s.p += pts;
     var sc = res === 'w' ? 1 : res === 'd' ? 0.5 : 0, o = typeof oppR === 'number' && isFinite(oppR) ? oppR : START_R;
     var dr = Math.round(32 * (sc - 1 / (1 + Math.pow(10, (o - s.r) / 400))));
@@ -9141,7 +9129,75 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     } catch (e) {}
   }
 
-  /* ---------- Tìm đối thủ thật (PeerJS, kết nối trực tiếp giữa 2 máy) ---------- */
+  /* ---------- Mạng: WebSocket công cộng (ntfy.sh) cho sảnh + PeerJS cho trận đấu ---------- */
+  var LOBBY = 'traceai-arena-lobby-v1-k7q2m9x4';
+  var SID = 's' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-3);
+  var lob = { ws: null, on: false, peers: {}, hb: 0, pr: 0 };
+  var INV = null, INC = null;
+  function toast(t) { try { if (window.showToast) window.showToast(t, false); } catch (e) {} }
+  function lobPost(m) {
+    m.f = SID;
+    try { fetch('https://ntfy.sh/' + LOBBY, { method: 'POST', body: JSON.stringify(m) }).catch(function () {}); } catch (e) {}
+  }
+  function busy() { return !!(F || INV || INC || inMatch()); }
+  function lobPresence() { if (ME && lob.on) lobPost({ t: 'p', n: ME.name, r: stats(ME.u).r, b: busy() ? 1 : 0 }); }
+  function lobWs() {
+    if (!lob.on) return;
+    var w;
+    try { w = new WebSocket('wss://ntfy.sh/' + LOBBY + '/ws'); } catch (e) { setTimeout(lobWs, 3000); return; }
+    lob.ws = w;
+    w.onopen = function () { lobPost({ t: 'hi' }); lobPresence(); };
+    w.onmessage = function (ev) {
+      var d, m;
+      try { d = JSON.parse(ev.data); } catch (e) { return; }
+      if (!d || d.event !== 'message') return;
+      try { m = JSON.parse(d.message); } catch (e) { return; }
+      if (m && typeof m === 'object' && m.f && m.f !== SID) lobMsg(m);
+    };
+    w.onclose = function () { if (lob.ws === w) { lob.ws = null; if (lob.on) setTimeout(lobWs, 2500); } };
+    w.onerror = function () { try { w.close(); } catch (e) {} };
+  }
+  function lobOpen() {
+    if (lob.on) return;
+    lob.on = true; lobWs();
+    lob.hb = setInterval(lobPresence, 20000);
+    lob.pr = setInterval(function () {
+      var now = Date.now(), ch = false;
+      Object.keys(lob.peers).forEach(function (k) { if (now - lob.peers[k].t > 50000) { delete lob.peers[k]; ch = true; } });
+      if (ch) renderOnline();
+    }, 5000);
+  }
+  function lobClose() {
+    if (!lob.on) return;
+    lobPost({ t: 'bye' });
+    lob.on = false; clearInterval(lob.hb); clearInterval(lob.pr);
+    var w = lob.ws; lob.ws = null; try { w && w.close(); } catch (e) {}
+    lob.peers = {};
+  }
+  function lobMsg(m) {
+    if (!ME) return;
+    var t = m.t;
+    if (t === 'hi') setTimeout(lobPresence, 200 + Math.random() * 1800);
+    else if (t === 'p') { lob.peers[m.f] = { n: String(m.n || 'Người chơi').slice(0, 24), r: m.r | 0, b: m.b ? 1 : 0, t: Date.now() }; renderOnline(); }
+    else if (t === 'bye') { delete lob.peers[m.f]; renderOnline(); }
+    else if (t === 'q') {
+      // Ghép trận: 2 người cùng đang tìm (cách nhau ≤ 10 giây) → ID nhỏ hơn làm chủ phòng
+      if (F && !F.lock && !inMatch() && Date.now() - F.t0 <= FIND_MS) {
+        if (SID < m.f) pairHost(m.f);
+        else if (!m.x) lobPost({ t: 'q', x: 1 });
+      }
+    }
+    else if (t === 'mm') { if (m.to === SID && m.pid && F && !F.lock && !inMatch()) pairJoin(String(m.pid)); }
+    else if (t === 'inv') {
+      if (m.to !== SID) return;
+      if (busy() || !m.pid) { lobPost({ t: 'idc', to: m.f }); return; }
+      showInc({ from: m.f, n: String(m.n || 'Người chơi').slice(0, 24), r: m.r | 0, pid: String(m.pid) });
+    }
+    else if (t === 'icx') { if (INC && INC.from === m.f) hideInc(); }
+    else if (t === 'idc') { if (INV && INV.to === m.f && !INV.j) { var nm = INV.name; clearInv(); toast(nm + ' đã từ chối lời mời.'); homeView(); } }
+  }
+
+  /* ---------- Kết nối trực tiếp 2 máy (PeerJS) ---------- */
   function loadPeer(cb) {
     if (typeof window.Peer === 'function') return cb(true);
     var done = false, sc = document.createElement('script');
@@ -9151,22 +9207,21 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     sc.onerror = function () { fin(false); };
     document.head.appendChild(sc);
   }
-
-  // Mỗi "ô chờ" là một ID cố định. Ai đăng ký được ô nào thì ngồi chờ ở ô đó,
-  // ai thấy ô đã có người thì kết nối vào làm khách. Ô đang bận → thử ô kế tiếp.
-  function search(me, onMatch) {
-    var st = { dead: false, matched: false, pending: false, peer: null };
-    function kill() { st.dead = true; if (!st.matched) { try { st.peer && st.peer.destroy(); } catch (e) {} } }
-
-    function tryHost(i) {
+  // Chủ phòng: tạo Peer, báo ID qua onReady, chờ đúng 1 người vào.
+  function hostSession(me, ttl, onReady, onMatch, onFail) {
+    var st = { dead: false, matched: false, pending: false, to: 0 }, p = null;
+    function kill() { st.dead = true; clearTimeout(st.to); if (!st.matched) { try { p && p.destroy(); } catch (e) {} } }
+    function fail() { if (st.dead || st.matched) return; kill(); if (onFail) onFail(); }
+    loadPeer(function (ok) {
+      if (!ok) return fail();
       if (st.dead) return;
-      if (i >= SLOTS) { setTimeout(function () { tryHost(0); }, 1200); return; }
-      var p;
-      try { p = new window.Peer(PREFIX + i, { debug: 0 }); } catch (e) { return; }
-      st.peer = p;
-      var opened = false;
-      p.on('open', function () { opened = true; if (st.dead) { try { p.destroy(); } catch (e) {} } });
-      p.on('disconnected', function () { if (!st.dead) { try { p.reconnect(); } catch (e) {} } });
+      try { p = new window.Peer(undefined, { debug: 0 }); } catch (e) { return fail(); }
+      p.on('open', function (id) {
+        if (st.dead) { try { p.destroy(); } catch (e) {} return; }
+        st.to = setTimeout(fail, ttl); onReady(id);
+      });
+      p.on('error', fail);
+      p.on('disconnected', function () { if (!st.dead && !st.matched) { try { p.reconnect(); } catch (e) {} } });
       p.on('connection', function (conn) {
         conn.on('open', function () {
           if (st.dead || st.matched || st.pending) { try { conn.send({ t: 'busy' }); } catch (e) {} setTimeout(function () { try { conn.close(); } catch (e) {} }, 300); return; }
@@ -9176,7 +9231,7 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
           timer = setTimeout(drop, 3000);
           conn.on('data', function (m) {
             if (m && m.t === 'hello' && st.pending && !st.matched && !st.dead) {
-              clearTimeout(timer); st.matched = true; st.pending = false;
+              clearTimeout(timer); st.matched = true; st.pending = false; clearTimeout(st.to);
               try { conn.send({ t: 'go' }); } catch (e) {}
               onMatch({ role: 'host', conn: conn, peer: p, seed: seed, oppName: String(m.name || 'Đối thủ').slice(0, 20), oppR: +m.r || 1000 });
             }
@@ -9185,43 +9240,107 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
           try { conn.send({ t: 'welcome', name: me.name, seed: seed, r: me.r }); } catch (e) { drop(); }
         });
       });
-      p.on('error', function (err) {
-        if (st.dead) return;
-        try { p.destroy(); } catch (e) {}
-        if (err && err.type === 'unavailable-id') joinSlot(i);
-        else setTimeout(function () { if (!st.dead && !st.matched) tryHost(i); }, 1500);
-      });
-    }
-
-    function joinSlot(i) {
+    });
+    return { cancel: kill };
+  }
+  // Khách: kết nối vào ID của chủ phòng.
+  function joinSession(me, pid, ttl, onMatch, onFail) {
+    var st = { dead: false, matched: false, to: 0 }, p = null;
+    function kill() { st.dead = true; clearTimeout(st.to); if (!st.matched) { try { p && p.destroy(); } catch (e) {} } }
+    function fail() { if (st.dead || st.matched) return; kill(); if (onFail) onFail(); }
+    loadPeer(function (ok) {
+      if (!ok) return fail();
       if (st.dead) return;
-      var p;
-      try { p = new window.Peer(undefined, { debug: 0 }); } catch (e) { return; }
-      st.peer = p;
-      var done = false, welcome = null, to = setTimeout(next, 3000);
-      function next() { if (done) return; done = true; clearTimeout(to); try { p.destroy(); } catch (e) {} if (!st.dead) tryHost(i + 1); }
-      p.on('error', next);
+      try { p = new window.Peer(undefined, { debug: 0 }); } catch (e) { return fail(); }
+      st.to = setTimeout(fail, ttl);
+      p.on('error', fail);
       p.on('open', function () {
         if (st.dead) { try { p.destroy(); } catch (e) {} return; }
-        var conn = p.connect(PREFIX + i, { reliable: true });
-        conn.on('error', next);
-        conn.on('close', function () { if (!st.matched) next(); });
+        var conn = p.connect(pid, { reliable: true }), welcome = null;
+        conn.on('error', fail);
+        conn.on('close', function () { if (!st.matched) fail(); });
         conn.on('data', function (m) {
-          if (done || !m) return;
-          if (m.t === 'busy') return next();
+          if (st.dead || !m) return;
+          if (m.t === 'busy') return fail();
           if (m.t === 'welcome' && !welcome) {
-            welcome = m; clearTimeout(to); to = setTimeout(next, 3000);
-            try { conn.send({ t: 'hello', name: me.name, r: me.r }); } catch (e) { next(); }
-          } else if (m.t === 'go' && welcome && !st.dead) {
-            done = true; st.matched = true; clearTimeout(to);
+            welcome = m;
+            try { conn.send({ t: 'hello', name: me.name, r: me.r }); } catch (e) { fail(); }
+          } else if (m.t === 'go' && welcome) {
+            st.matched = true; clearTimeout(st.to);
             onMatch({ role: 'guest', conn: conn, peer: p, seed: welcome.seed >>> 0, oppName: String(welcome.name || 'Đối thủ').slice(0, 20), oppR: +welcome.r || 1000 });
           }
         });
       });
-    }
-
-    loadPeer(function (ok) { if (ok && !st.dead) tryHost(0); });
+    });
     return { cancel: kill };
+  }
+
+  /* ---------- Ghép trận nhanh ---------- */
+  function mmLink(f) {
+    return function (link) {
+      if (F !== f) { try { link.conn.close(); link.peer.destroy(); } catch (e) {} return; }
+      f.net = null; stopFind();
+      beginMatch(link.seed, { name: link.oppName, bot: false, r: Math.max(0, Math.min(4000, link.oppR | 0)) }, link);
+    };
+  }
+  function pairHost(sid) {
+    var f = F; f.lock = true;
+    f.net = hostSession(ME, 6000, function (pid) { lobPost({ t: 'mm', to: sid, pid: pid }); }, mmLink(f), function () { if (F === f) { f.net = null; f.lock = false; } });
+  }
+  function pairJoin(pid) {
+    var f = F; f.lock = true;
+    f.net = joinSession(ME, pid, 6000, mmLink(f), function () { if (F === f) { f.net = null; f.lock = false; } });
+  }
+
+  /* ---------- Khiêu chiến ---------- */
+  function invLink(inv) {
+    return function (link) {
+      if (INV !== inv) { try { link.conn.close(); link.peer.destroy(); } catch (e) {} return; }
+      INV = null;
+      beginMatch(link.seed, { name: link.oppName, bot: false, r: Math.max(0, Math.min(4000, link.oppR | 0)) }, link);
+    };
+  }
+  function clearInv() { var v = INV; INV = null; if (v && v.h) { try { v.h.cancel(); } catch (e) {} } lobPresence(); }
+  function challenge(sid) {
+    var p = lob.peers[sid];
+    if (!p || busy()) return;
+    ME.r = stats(ME.u).r;
+    var inv = INV = { to: sid, name: p.n, h: null };
+    inviteView(p.n); lobPresence();
+    inv.h = hostSession(ME, 30000,
+      function (pid) { if (INV === inv) lobPost({ t: 'inv', to: sid, n: ME.name, r: ME.r, pid: pid }); },
+      invLink(inv),
+      function () { if (INV === inv) { INV = null; lobPresence(); toast(inv.name + ' không phản hồi lời mời.'); homeView(); } });
+  }
+  function cancelInv() {
+    if (INV && !INV.j) lobPost({ t: 'icx', to: INV.to });
+    clearInv(); homeView();
+  }
+  function showInc(c) {
+    hideInc(); INC = c;
+    var d = document.createElement('div'); d.id = 'ar-inv'; d.className = 'ar-inv';
+    d.innerHTML = '<div class="ar-invc"><div class="ar-ico">⚔️</div><h4>' + esc(c.n) + ' khiêu chiến bạn!</h4><p class="ar-note" style="margin:0 0 14px">Rating ' + c.r + ' · ' + QN + ' câu hỏi</p>' +
+      '<button type="button" class="ar-btn" data-iv="y">Chấp nhận</button><button type="button" class="ar-btn ghost" data-iv="n">Từ chối</button></div>';
+    d.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-iv]'); if (!b) return;
+      if (b.getAttribute('data-iv') === 'y') acceptInc();
+      else { var f = INC && INC.from; hideInc(); if (f) lobPost({ t: 'idc', to: f }); }
+    });
+    $('arena-modal').appendChild(d);
+    c.tm = setTimeout(hideInc, 28000);
+    sfx('go'); lobPresence();
+  }
+  function hideInc() {
+    if (INC) clearTimeout(INC.tm);
+    INC = null;
+    var d = $('ar-inv'); if (d && d.parentNode) d.parentNode.removeChild(d);
+  }
+  function acceptInc() {
+    var c = INC; if (!c || INV || F || inMatch()) { hideInc(); return; }
+    hideInc(); ME.r = stats(ME.u).r;
+    var inv = INV = { j: true, to: c.from, name: c.n, h: null };
+    connectView(c.n); lobPresence();
+    inv.h = joinSession(ME, c.pid, 8000, invLink(inv), function () { if (INV === inv) { INV = null; lobPresence(); toast('Không kết nối được với ' + c.n + '.'); homeView(); } });
   }
 
   /* ---------- Trạng thái ---------- */
@@ -9233,9 +9352,7 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     body('<div class="ar-hero"><div class="ar-ico">🔒</div><h4>Cần đăng nhập</h4><p>Đấu trường dành cho học sinh có tài khoản. Hãy đăng nhập hoặc tạo tài khoản để thi đấu.</p></div>' +
       '<button type="button" class="ar-btn" data-act="login">Đăng nhập / Tạo tài khoản</button>');
   }
-  var LB_ALL = false, tkIv = 0;
-  function mmss(ms) { var s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
-  function ticketText(s) { return s.tk >= TK_MAX ? 'Đã đầy vé' : 'Vé mới sau ' + mmss(TK_REGEN - (Date.now() - s.tt)); }
+  var LB_ALL = false;
   function lbHtml() {
     var all = allStats(), rows = Object.keys(all).map(function (u) {
       var s = normS(all[u]), p = prof(u);
@@ -9253,15 +9370,28 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     };
     return '<div class="ar-pod">' + slot(rows[1], 'p2', 2) + slot(rows[0], 'p1', 1, true) + slot(rows[2], 'p3', 3) + '</div>';
   }
+  function onlineHtml() {
+    var ids = Object.keys(lob.peers).sort(function (a, b) { return lob.peers[b].r - lob.peers[a].r; });
+    if (!ids.length) return '<div class="box">Chưa có người chơi nào khác đang online. Hãy bấm ⚡ Ghép trận nhanh hoặc chờ bạn bè vào Đấu trường.</div>';
+    return '<div class="ar-ol">' + ids.map(function (id) {
+      var p = lob.peers[id], dis = p.b || busy();
+      return '<div class="ar-or"><span class="ar-sa">' + esc(ini(p.n)) + '</span><span class="n">' + esc(p.n) + '</span><small>' + p.r + '</small>' +
+        '<button type="button" class="ar-chal" data-act="chal" data-sid="' + esc(id) + '"' + (dis ? ' disabled' : '') + '>' + (p.b ? 'Đang bận' : 'Khiêu chiến') + '</button></div>';
+    }).join('') + '</div>';
+  }
+  function renderOnline() {
+    var el = $('ar-onl-list'), c = $('ar-onl-n');
+    if (el) el.innerHTML = onlineHtml();
+    if (c) c.textContent = Object.keys(lob.peers).length;
+  }
   function homeView() {
-    var s = regen(stats(ME.u)); putStats(ME.u, s);
+    var s = stats(ME.u);
     var p = prof(ME.u); ME.name = p.name || ME.name;
     var rk = rankOf(s.r), g = s.w + s.l + s.d, wr = g ? Math.round(s.w / g * 100) : 0;
     var hist = s.h.slice(0, 10).map(function (h) {
       var cls = h.res, t = h.res === 'w' ? 'Thắng' : h.res === 'l' ? 'Thua' : 'Hòa';
       return '<div class="ar-hi ' + cls + '"><div class="ic">' + (h.res === 'w' ? '✓' : h.res === 'l' ? '✕' : '=') + '</div><div class="m"><b>' + t + '</b><small>' + ago(h.t) + '</small><div>' + h.ok + '/' + QN + ' câu</div></div><div class="d"><b>' + (h.d > 0 ? '+' : '') + h.d + '</b><small>RATING</small></div></div>';
     }).join('') || '<div class="ar-empty">Chưa có trận nào. Hãy bấm nút ⚡ để bắt đầu!</div>';
-    var noTk = s.tk <= 0;
     body('<div class="ar-lobby">' +
       '<div class="ar-col"><div class="ar-c grow"><h4 class="cy">Thông tin đấu thủ</h4><div class="sub">' + esc(ME.name) + '</div>' +
         '<div class="ar-pav"><div>' + avHtml(p) + '</div><i></i></div>' +
@@ -9270,23 +9400,15 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
         '<div class="ar-rows"><div>Trận đã đấu: <b>' + g + '</b></div>' +
         '<div>Kết quả (T/H/T): <span><b class="g">' + s.w + 'W</b> / <b>' + s.d + 'D</b> / <b class="r">' + s.l + 'L</b></span></div>' +
         '<div>Tỷ lệ thắng: <b class="g" style="color:#22d3ee">' + wr + '%</b></div>' +
-        '<div>Chuỗi thắng: <span><b class="y">🏅 ' + s.st + '</b> <small>(Kỷ lục: ' + s.bs + ')</small></span></div></div></div>' +
-        '<div class="ar-c ar-tk"><div class="t"><span>🎫 VÉ</span><span>' + s.tk + '/' + TK_MAX + '</span></div><div class="ar-tkb">' +
-          [0, 1, 2].map(function (i) { return '<i class="' + (i < s.tk ? 'on' : '') + '"></i>'; }).join('') + '</div><p id="ar-tk-txt">' + ticketText(s) + '</p></div></div>' +
-      '<div class="ar-col"><div class="ar-c grow"><div class="ar-go"><button type="button" class="ar-bolt" data-act="find" aria-label="Đấu nhanh"' + (noTk ? ' disabled' : '') + '>⚡</button>' +
-        '<div class="ar-golbl">' + (noTk ? 'Hết vé' : 'Đấu nhanh') + '</div>' +
-        '<p class="ar-note" style="margin:0;max-width:340px">' + QN + ' câu · ' + (QT / 1000) + ' giây mỗi câu. Không có ai cùng tìm trận sau ' + (FIND_MS / 1000) + ' giây, bạn sẽ đấu với Bot.</p></div>' +
-        '<div class="ar-onl"><div class="h"><span>Đang online — Khiêu chiến</span></div><div class="box">Chưa có danh sách người chơi online. Hãy bấm ⚡ Đấu nhanh để tìm người cùng đang tìm trận.</div></div></div></div>' +
+        '<div>Chuỗi thắng: <span><b class="y">🏅 ' + s.st + '</b> <small>(Kỷ lục: ' + s.bs + ')</small></span></div></div></div></div>' +
+      '<div class="ar-col"><div class="ar-c grow"><div class="ar-go"><button type="button" class="ar-bolt" data-act="find" aria-label="Ghép trận nhanh">⚡</button>' +
+        '<div class="ar-golbl">Ghép trận nhanh</div>' +
+        '<p class="ar-note" style="margin:0;max-width:340px">' + QN + ' câu · ' + (QT / 1000) + ' giây mỗi câu. Nếu có người khác cũng bấm trong vòng ' + (FIND_MS / 1000) + ' giây, hai bạn sẽ được ghép trận. Không có ai, bạn đấu với Bot.</p></div>' +
+        '<div class="ar-onl"><div class="h"><span>Đang online — Khiêu chiến</span><b id="ar-onl-n">' + Object.keys(lob.peers).length + '</b></div><div id="ar-onl-list">' + onlineHtml() + '</div></div></div></div>' +
       '<div class="ar-col"><div class="ar-c"><h4>Lịch sử thi đấu</h4><div class="sub">Lịch sử đấu gần đây (10)</div><div class="ar-hist">' + hist + '</div></div>' +
         '<div class="ar-c grow"><h4>Leaderboard</h4><div class="sub">Bảng xếp hạng đấu trường</div>' + lbHtml() +
         '<button type="button" class="ar-more" data-act="lb">' + (LB_ALL ? 'Thu gọn' : 'Xem tất cả') + '</button></div></div>' +
       '</div>', true);
-    clearInterval(tkIv);
-    tkIv = setInterval(function () {
-      var el = $('ar-tk-txt'); if (!el || !ME || inMatch() || F) return;
-      var cur = regen(stats(ME.u)), shown = parseInt((el.parentNode.querySelector('.t span:last-child') || {}).textContent, 10);
-      if (cur.tk !== shown) { putStats(ME.u, cur); homeView(); } else el.textContent = ticketText(cur);
-    }, 1000);
   }
 
   function stopFind() {
@@ -9294,27 +9416,34 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     clearInterval(F.iv);
     if (F.net) F.net.cancel();
     F = null;
+    lobPresence();
   }
   function findView() {
     body('<div class="ar-find"><div class="ar-spin"></div><div class="ar-count" id="ar-cd">' + (FIND_MS / 1000) + '</div>' +
-      '<p class="ar-hero" style="margin:0"><b>Đang tìm đối thủ…</b></p>' +
-      '<p class="ar-note" style="margin-top:6px">Không có ai sau ' + (FIND_MS / 1000) + ' giây bạn sẽ đấu với Bot.</p></div>' +
+      '<p class="ar-hero" style="margin:0"><b>Đang ghép trận…</b></p>' +
+      '<p class="ar-note" style="margin-top:6px">Không có ai cùng ghép trận sau ' + (FIND_MS / 1000) + ' giây bạn sẽ đấu với Bot.</p></div>' +
       '<button type="button" class="ar-btn ghost" data-act="cancel">Hủy</button>');
   }
+  function inviteView(name) {
+    body('<div class="ar-find"><div class="ar-spin"></div><p class="ar-hero" style="margin:0"><b>Đã gửi lời mời tới ' + esc(name) + '…</b></p>' +
+      '<p class="ar-note" style="margin-top:6px">Đang chờ đối thủ chấp nhận.</p></div>' +
+      '<button type="button" class="ar-btn ghost" data-act="icancel">Hủy lời mời</button>');
+  }
+  function connectView(name) {
+    body('<div class="ar-find"><div class="ar-spin"></div><p class="ar-hero" style="margin:0"><b>Đang kết nối với ' + esc(name) + '…</b></p></div>' +
+      '<button type="button" class="ar-btn ghost" data-act="icancel">Hủy</button>');
+  }
   function startFind() {
-    stopFind(); clearInterval(tkIv); ME.r = stats(ME.u).r;
+    stopFind(); ME.r = stats(ME.u).r;
     findView();
-    var f = F = { t0: Date.now(), iv: 0, net: null };
-    f.net = search(ME, function (link) {
-      if (F !== f) { try { link.conn.close(); link.peer.destroy(); } catch (e) {} return; }
-      f.net = null; stopFind();
-      beginMatch(link.seed, { name: link.oppName, bot: false, r: Math.max(0, Math.min(4000, link.oppR | 0)) }, link);
-    });
+    var f = F = { t0: Date.now(), iv: 0, net: null, lock: false, nq: 1 };
+    lobPost({ t: 'q' }); lobPresence();
     f.iv = setInterval(function () {
       if (F !== f) return;
-      var left = Math.max(0, FIND_MS - (Date.now() - f.t0)), cd = $('ar-cd');
+      var el = Date.now() - f.t0, left = Math.max(0, FIND_MS - el), cd = $('ar-cd');
       if (cd) cd.textContent = Math.ceil(left / 1000);
-      if (left <= 0) {
+      if (!f.lock && el > f.nq * 3000 && left > 0) { f.nq++; lobPost({ t: 'q' }); }
+      if (left <= 0 && !f.lock) {
         stopFind();
         beginMatch((Math.random() * 4294967296) >>> 0, { name: BOTS[Math.floor(Math.random() * BOTS.length)], bot: true, r: Math.max(0, ME.r + Math.round(Math.random() * 160 - 80)) }, null);
       }
@@ -9325,6 +9454,7 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
   function beginMatch(seed, opp, link) {
     G = { qs: pick(seed), opp: opp, link: link, qi: -1, q: null, sc: { me: 0, opp: 0 }, ok: 0, oppAns: {}, oppFin: null, over: false, waiting: false, timers: [], tick: 0, acc: 0.55 + Math.random() * 0.25 };
     var g = G;
+    hideInc(); lobPresence();
     if (link) {
       link.conn.on('data', function (m) { if (G === g) onOpp(m); });
       link.conn.on('close', function () { if (G === g) oppLeft(); });
@@ -9438,7 +9568,7 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     if (!G || G.over) return;
     var g = G, me = g.sc.me, res = forceWin ? 'w' : me > opT ? 'w' : me < opT ? 'l' : 'd';
     g.over = true; g.waiting = false; clearInterval(g.tick);
-    g.timers.forEach(clearTimeout);
+    g.timers.forEach(clearTimeout); setTimeout(lobPresence, 300);
     var rr = record(ME.u, res, me, g.opp.r, g.ok, ME.name); sfx(res);
     endLink(g);
     var title = res === 'w' ? 'Bạn thắng!' : res === 'l' ? 'Bạn thua rồi' : 'Hòa nhau!';
@@ -9486,15 +9616,17 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     if (inMatch()) return;
     if (!u) { ME = null; return loginView(); }
     ME = { u: u, name: (a.name() || u.split('@')[0]) };
-    homeView();
+    homeView(); lobOpen();
   }
+  function cancelInvQuiet() { if (INV && !INV.j) lobPost({ t: 'icx', to: INV.to }); clearInv(); }
   function close() {
     if (inMatch()) {
       if (!window.confirm('Rời trận lúc này sẽ tính là thua. Bạn vẫn muốn thoát?')) return;
       leaveMatch();
     }
-    if (F && ME) refundTicket(ME.u);
-    stopFind(); G = null; clearInterval(tkIv);
+    stopFind(); G = null; hideInc();
+    if (INV) cancelInvQuiet();
+    lobClose();
     $('arena-modal').classList.remove('open');
     try { if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {}
   }
@@ -9509,10 +9641,12 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     var b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
     var a = b.getAttribute('data-act');
     if (a === 'find') {
-      if (!useTicket(ME.u)) { if (window.showToast) showToast('Hết vé! Vé mới sẽ có sau ít phút.', false); homeView(); return; }
+      if (INV || INC || inMatch()) return;
       G = null; sfx('go'); startFind();
     }
-    else if (a === 'cancel') { stopFind(); refundTicket(ME.u); homeView(); }
+    else if (a === 'cancel') { stopFind(); homeView(); }
+    else if (a === 'chal') challenge(b.getAttribute('data-sid'));
+    else if (a === 'icancel') cancelInv();
     else if (a === 'home') { G = null; homeView(); }
     else if (a === 'lb') { LB_ALL = !LB_ALL; homeView(); }
     else if (a === 'login') { close(); var ab = $('acct-btn'); if (ab) ab.click(); }
@@ -9526,7 +9660,10 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
       if (k >= 0) lock(k);
     }
   });
-  window.addEventListener('beforeunload', function () { if (inMatch()) send({ t: 'bye' }); });
+  window.addEventListener('beforeunload', function () {
+    if (inMatch()) send({ t: 'bye' });
+    if (lob.on) { try { navigator.sendBeacon('https://ntfy.sh/' + LOBBY, JSON.stringify({ t: 'bye', f: SID })); } catch (e) {} }
+  });
 
   window.traceArena = { open: open, _bank: BANK, _pick: pick };
 })();
