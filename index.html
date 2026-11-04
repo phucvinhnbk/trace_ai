@@ -9129,57 +9129,98 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     } catch (e) {}
   }
 
-  /* ---------- Mạng: WebSocket công cộng (ntfy.sh) cho sảnh + PeerJS cho trận đấu ---------- */
-  var LOBBY = 'traceai-arena-lobby-v1-k7q2m9x4';
+  /* ---------- Mạng: WebSocket công cộng (MQTT) cho sảnh, ghép trận và trận đấu ---------- */
+  /* Sảnh dùng MQTT qua WebSocket công cộng (nhiều broker song song, khử trùng lặp theo ID tin) */
+  var BROKERS = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt'];
+  var MQTT_SRC = ['https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js', 'https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js'];
+  var TOP = 'traceai-arena-v1-k7q2m9x4/';
   var SID = 's' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-3);
-  var lob = { ws: null, on: false, peers: {}, hb: 0, pr: 0 };
+  var lob = { cs: [], on: false, ok: false, peers: {}, hb: 0, pr: 0, seen: {}, seenQ: [] };
   var INV = null, INC = null;
   function toast(t) { try { if (window.showToast) window.showToast(t, false); } catch (e) {} }
   function lobPost(m) {
-    m.f = SID;
-    try { fetch('https://ntfy.sh/' + LOBBY, { method: 'POST', body: JSON.stringify(m) }).catch(function () {}); } catch (e) {}
+    m.f = SID; m.i = SID + Math.random().toString(36).slice(2, 9);
+    var payload = JSON.stringify(m), topic = TOP + (m.to ? 'u/' + m.to : 'all');
+    lob.cs.forEach(function (c) { try { if (c.connected) c.publish(topic, payload, { qos: 0 }); } catch (e) {} });
   }
   function busy() { return !!(F || INV || INC || inMatch()); }
   function lobPresence() { if (ME && lob.on) lobPost({ t: 'p', n: ME.name, r: stats(ME.u).r, b: busy() ? 1 : 0 }); }
-  function lobWs() {
+  function netStat() { var e = $('ar-net'); if (e) e.textContent = lob.ok ? '🟢 Đã kết nối sảnh' : '🟠 Đang kết nối sảnh…'; }
+  function loadMqtt(cb) {
+    if (window.mqtt && typeof window.mqtt.connect === 'function') return cb(true);
+    var i = 0;
+    (function next() {
+      if (i >= MQTT_SRC.length) return cb(false);
+      var sc = document.createElement('script');
+      sc.src = MQTT_SRC[i++]; sc.async = true;
+      sc.onload = function () { if (window.mqtt && typeof window.mqtt.connect === 'function') cb(true); else next(); };
+      sc.onerror = next;
+      document.head.appendChild(sc);
+    })();
+  }
+  function lobDup(id) {
+    if (!id) return false;
+    if (lob.seen[id]) return true;
+    lob.seen[id] = 1; lob.seenQ.push(id);
+    if (lob.seenQ.length > 400) delete lob.seen[lob.seenQ.shift()];
+    return false;
+  }
+  function lobConn() {
     if (!lob.on) return;
-    var w;
-    try { w = new WebSocket('wss://ntfy.sh/' + LOBBY + '/ws'); } catch (e) { setTimeout(lobWs, 3000); return; }
-    lob.ws = w;
-    w.onopen = function () { lobPost({ t: 'hi' }); lobPresence(); };
-    w.onmessage = function (ev) {
-      var d, m;
-      try { d = JSON.parse(ev.data); } catch (e) { return; }
-      if (!d || d.event !== 'message') return;
-      try { m = JSON.parse(d.message); } catch (e) { return; }
-      if (m && typeof m === 'object' && m.f && m.f !== SID) lobMsg(m);
-    };
-    w.onclose = function () { if (lob.ws === w) { lob.ws = null; if (lob.on) setTimeout(lobWs, 2500); } };
-    w.onerror = function () { try { w.close(); } catch (e) {} };
+    loadMqtt(function (ok) {
+      if (!lob.on) return;
+      if (!ok) { setTimeout(lobConn, 4000); return; }
+      BROKERS.forEach(function (url) {
+        var c;
+        try { c = window.mqtt.connect(url, { clientId: 'ta_' + SID + '_' + Math.random().toString(36).slice(2, 6), clean: true, keepalive: 30, reconnectPeriod: 3000, connectTimeout: 8000 }); } catch (e) { return; }
+        lob.cs.push(c);
+        c.on('connect', function () {
+          c.subscribe([TOP + 'all', TOP + 'u/' + SID], { qos: 0 });
+          if (!lob.ok) { lob.ok = true; netStat(); setTimeout(function () { lobPost({ t: 'hi' }); lobPresence(); }, 400); }
+        });
+        c.on('close', function () { setTimeout(function () { lob.ok = lob.cs.some(function (x) { return x.connected; }); netStat(); }, 0); });
+        c.on('error', function () {});
+        c.on('message', function (tp, payload) {
+          var m;
+          try { m = JSON.parse(String(payload)); } catch (e) { return; }
+          if (!m || typeof m !== 'object' || !m.f || m.f === SID || lobDup(m.i)) return;
+          lobMsg(m);
+        });
+      });
+    });
   }
   function lobOpen() {
     if (lob.on) return;
-    lob.on = true; lobWs();
-    lob.hb = setInterval(lobPresence, 20000);
+    lob.on = true; lobConn();
+    lob.hb = setInterval(lobPresence, 25000);
     lob.pr = setInterval(function () {
       var now = Date.now(), ch = false;
-      Object.keys(lob.peers).forEach(function (k) { if (now - lob.peers[k].t > 50000) { delete lob.peers[k]; ch = true; } });
+      Object.keys(lob.peers).forEach(function (k) { if (now - lob.peers[k].t > 65000) { delete lob.peers[k]; ch = true; } });
       if (ch) renderOnline();
     }, 5000);
   }
   function lobClose() {
     if (!lob.on) return;
     lobPost({ t: 'bye' });
-    lob.on = false; clearInterval(lob.hb); clearInterval(lob.pr);
-    var w = lob.ws; lob.ws = null; try { w && w.close(); } catch (e) {}
-    lob.peers = {};
+    lob.on = false; lob.ok = false; clearInterval(lob.hb); clearInterval(lob.pr);
+    var cs = lob.cs; lob.cs = []; lob.peers = {};
+    setTimeout(function () { cs.forEach(function (c) { try { c.end(true); } catch (e) {} }); }, 400);
   }
   function lobMsg(m) {
     if (!ME) return;
     var t = m.t;
     if (t === 'hi') setTimeout(lobPresence, 200 + Math.random() * 1800);
     else if (t === 'p') { lob.peers[m.f] = { n: String(m.n || 'Người chơi').slice(0, 24), r: m.r | 0, b: m.b ? 1 : 0, t: Date.now() }; renderOnline(); }
-    else if (t === 'bye') { delete lob.peers[m.f]; renderOnline(); }
+    else if (t === 'bye') {
+      delete lob.peers[m.f]; renderOnline();
+      Object.keys(LINKS).forEach(function (k) { var l = LINKS[k]; if (l && l.to === m.f && l.cl) { try { l.cl(); } catch (e) {} } });
+    }
+    else if (t === 'g') {
+      if (m.to !== SID) return;
+      var l = LINKS[m.mid];
+      if (l && l.fn) { try { l.fn(m.d); } catch (e) {} }
+      else { var q = PEND[m.mid] = PEND[m.mid] || []; if (q.length < 60) q.push(m.d); }
+    }
     else if (t === 'q') {
       // Ghép trận: 2 người cùng đang tìm (cách nhau ≤ 10 giây) → ID nhỏ hơn làm chủ phòng
       if (F && !F.lock && !inMatch() && Date.now() - F.t0 <= FIND_MS) {
@@ -9187,133 +9228,80 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
         else if (!m.x) lobPost({ t: 'q', x: 1 });
       }
     }
-    else if (t === 'mm') { if (m.to === SID && m.pid && F && !F.lock && !inMatch()) pairJoin(String(m.pid)); }
+    else if (t === 'mm') { if (m.to === SID && m.mid && F && !F.lock && !inMatch()) pairGuest(m); }
+    else if (t === 'mmok') { if (m.to === SID) pairDone(m); }
+    else if (t === 'iok') {
+      if (m.to !== SID || !INV || INV.mid !== m.mid || INV.to !== m.f) return;
+      var v = INV; clearTimeout(v.tm); INV = null;
+      startLink(mkLink(v.mid, m.f, v.seed, m.n, m.r, 'host'));
+    }
     else if (t === 'inv') {
-      if (m.to !== SID) return;
-      if (busy() || !m.pid) { lobPost({ t: 'idc', to: m.f }); return; }
-      showInc({ from: m.f, n: String(m.n || 'Người chơi').slice(0, 24), r: m.r | 0, pid: String(m.pid) });
+      if (m.to !== SID || LINKS[m.mid] || (INC && INC.mid === m.mid)) return;
+      if (busy() || !m.mid) { lobPost({ t: 'idc', to: m.f }); return; }
+      showInc({ from: m.f, n: String(m.n || 'Người chơi').slice(0, 24), r: m.r | 0, mid: String(m.mid), seed: m.seed >>> 0 });
     }
     else if (t === 'icx') { if (INC && INC.from === m.f) hideInc(); }
-    else if (t === 'idc') { if (INV && INV.to === m.f && !INV.j) { var nm = INV.name; clearInv(); toast(nm + ' đã từ chối lời mời.'); homeView(); } }
+    else if (t === 'idc') { if (INV && INV.to === m.f) { var nm = INV.name; clearInv(); toast(nm + ' đã từ chối lời mời.'); homeView(); } }
   }
 
-  /* ---------- Kết nối trực tiếp 2 máy (PeerJS) ---------- */
-  function loadPeer(cb) {
-    if (typeof window.Peer === 'function') return cb(true);
-    var done = false, sc = document.createElement('script');
-    function fin(v) { if (!done) { done = true; cb(v); } }
-    sc.src = PEER_SRC; sc.async = true;
-    sc.onload = function () { fin(typeof window.Peer === 'function'); };
-    sc.onerror = function () { fin(false); };
-    document.head.appendChild(sc);
+  /* ---------- Liên kết trận đấu (đi qua sảnh WebSocket, không dùng WebRTC) ---------- */
+  var LINKS = {}, PEND = {};
+  function newMid() { return SID + Math.random().toString(36).slice(2, 8); }
+  function mkLink(mid, to, seed, name, r, role) {
+    var l = { role: role, seed: seed >>> 0, oppName: String(name || 'Đối thủ').slice(0, 20), oppR: +r || 1000, mid: mid, to: to, fn: null, cl: null, closed: false };
+    l.conn = {
+      send: function (m) { if (!l.closed) lobPost({ t: 'g', to: to, mid: mid, d: m }); },
+      on: function (ev, f) {
+        if (ev === 'data') { l.fn = f; var q = PEND[mid] || []; delete PEND[mid]; q.forEach(function (x) { try { f(x); } catch (e) {} }); }
+        else if (ev === 'close') l.cl = f;
+      },
+      close: function () { l.closed = true; delete LINKS[mid]; }
+    };
+    l.peer = { destroy: function () {} };
+    LINKS[mid] = l;
+    return l;
   }
-  // Chủ phòng: tạo Peer, báo ID qua onReady, chờ đúng 1 người vào.
-  function hostSession(me, ttl, onReady, onMatch, onFail) {
-    var st = { dead: false, matched: false, pending: false, to: 0 }, p = null;
-    function kill() { st.dead = true; clearTimeout(st.to); if (!st.matched) { try { p && p.destroy(); } catch (e) {} } }
-    function fail() { if (st.dead || st.matched) return; kill(); if (onFail) onFail(); }
-    loadPeer(function (ok) {
-      if (!ok) return fail();
-      if (st.dead) return;
-      try { p = new window.Peer(undefined, { debug: 0 }); } catch (e) { return fail(); }
-      p.on('open', function (id) {
-        if (st.dead) { try { p.destroy(); } catch (e) {} return; }
-        st.to = setTimeout(fail, ttl); onReady(id);
-      });
-      p.on('error', fail);
-      p.on('disconnected', function () { if (!st.dead && !st.matched) { try { p.reconnect(); } catch (e) {} } });
-      p.on('connection', function (conn) {
-        conn.on('open', function () {
-          if (st.dead || st.matched || st.pending) { try { conn.send({ t: 'busy' }); } catch (e) {} setTimeout(function () { try { conn.close(); } catch (e) {} }, 300); return; }
-          st.pending = true;
-          var seed = (Math.random() * 4294967296) >>> 0, timer;
-          function drop() { clearTimeout(timer); if (!st.matched) { st.pending = false; try { conn.close(); } catch (e) {} } }
-          timer = setTimeout(drop, 3000);
-          conn.on('data', function (m) {
-            if (m && m.t === 'hello' && st.pending && !st.matched && !st.dead) {
-              clearTimeout(timer); st.matched = true; st.pending = false; clearTimeout(st.to);
-              try { conn.send({ t: 'go' }); } catch (e) {}
-              onMatch({ role: 'host', conn: conn, peer: p, seed: seed, oppName: String(m.name || 'Đối thủ').slice(0, 20), oppR: +m.r || 1000 });
-            }
-          });
-          conn.on('close', function () { if (!st.matched) drop(); });
-          try { conn.send({ t: 'welcome', name: me.name, seed: seed, r: me.r }); } catch (e) { drop(); }
-        });
-      });
-    });
-    return { cancel: kill };
-  }
-  // Khách: kết nối vào ID của chủ phòng.
-  function joinSession(me, pid, ttl, onMatch, onFail) {
-    var st = { dead: false, matched: false, to: 0 }, p = null;
-    function kill() { st.dead = true; clearTimeout(st.to); if (!st.matched) { try { p && p.destroy(); } catch (e) {} } }
-    function fail() { if (st.dead || st.matched) return; kill(); if (onFail) onFail(); }
-    loadPeer(function (ok) {
-      if (!ok) return fail();
-      if (st.dead) return;
-      try { p = new window.Peer(undefined, { debug: 0 }); } catch (e) { return fail(); }
-      st.to = setTimeout(fail, ttl);
-      p.on('error', fail);
-      p.on('open', function () {
-        if (st.dead) { try { p.destroy(); } catch (e) {} return; }
-        var conn = p.connect(pid, { reliable: true }), welcome = null;
-        conn.on('error', fail);
-        conn.on('close', function () { if (!st.matched) fail(); });
-        conn.on('data', function (m) {
-          if (st.dead || !m) return;
-          if (m.t === 'busy') return fail();
-          if (m.t === 'welcome' && !welcome) {
-            welcome = m;
-            try { conn.send({ t: 'hello', name: me.name, r: me.r }); } catch (e) { fail(); }
-          } else if (m.t === 'go' && welcome) {
-            st.matched = true; clearTimeout(st.to);
-            onMatch({ role: 'guest', conn: conn, peer: p, seed: welcome.seed >>> 0, oppName: String(welcome.name || 'Đối thủ').slice(0, 20), oppR: +welcome.r || 1000 });
-          }
-        });
-      });
-    });
-    return { cancel: kill };
+  function startLink(link) {
+    beginMatch(link.seed, { name: link.oppName, bot: false, r: Math.max(0, Math.min(4000, link.oppR | 0)) }, link);
   }
 
   /* ---------- Ghép trận nhanh ---------- */
-  function mmLink(f) {
-    return function (link) {
-      if (F !== f) { try { link.conn.close(); link.peer.destroy(); } catch (e) {} return; }
-      f.net = null; stopFind();
-      beginMatch(link.seed, { name: link.oppName, bot: false, r: Math.max(0, Math.min(4000, link.oppR | 0)) }, link);
-    };
-  }
+  // Hai người đang cùng tìm (cách nhau ≤ 10 giây): ID nhỏ hơn gửi 'mm', người kia đáp 'mmok' → vào trận.
   function pairHost(sid) {
     var f = F; f.lock = true;
-    f.net = hostSession(ME, 6000, function (pid) { lobPost({ t: 'mm', to: sid, pid: pid }); }, mmLink(f), function () { if (F === f) { f.net = null; f.lock = false; } });
+    var mid = newMid(), seed = (Math.random() * 4294967296) >>> 0;
+    f.pend = { mid: mid, to: sid, seed: seed };
+    lobPost({ t: 'mm', to: sid, mid: mid, seed: seed, n: ME.name, r: ME.r });
+    f.lt = setTimeout(function () { if (F === f && f.pend && f.pend.mid === mid) { f.pend = null; f.lock = false; } }, 4000);
   }
-  function pairJoin(pid) {
+  function pairGuest(m) {
     var f = F; f.lock = true;
-    f.net = joinSession(ME, pid, 6000, mmLink(f), function () { if (F === f) { f.net = null; f.lock = false; } });
+    var link = mkLink(m.mid, m.f, m.seed, m.n, m.r, 'guest');
+    lobPost({ t: 'mmok', to: m.f, mid: m.mid, n: ME.name, r: ME.r });
+    clearTimeout(f.lt); stopFind();
+    startLink(link);
+  }
+  function pairDone(m) {
+    var f = F; if (!f || !f.pend || f.pend.mid !== m.mid || f.pend.to !== m.f) return;
+    var p = f.pend, link = mkLink(p.mid, m.f, p.seed, m.n, m.r, 'host');
+    clearTimeout(f.lt); stopFind();
+    startLink(link);
   }
 
   /* ---------- Khiêu chiến ---------- */
-  function invLink(inv) {
-    return function (link) {
-      if (INV !== inv) { try { link.conn.close(); link.peer.destroy(); } catch (e) {} return; }
-      INV = null;
-      beginMatch(link.seed, { name: link.oppName, bot: false, r: Math.max(0, Math.min(4000, link.oppR | 0)) }, link);
-    };
-  }
-  function clearInv() { var v = INV; INV = null; if (v && v.h) { try { v.h.cancel(); } catch (e) {} } lobPresence(); }
+  function clearInv() { var v = INV; INV = null; if (v) clearTimeout(v.tm); lobPresence(); }
   function challenge(sid) {
     var p = lob.peers[sid];
     if (!p || busy()) return;
     ME.r = stats(ME.u).r;
-    var inv = INV = { to: sid, name: p.n, h: null };
+    var mid = newMid(), seed = (Math.random() * 4294967296) >>> 0;
+    var inv = INV = { to: sid, name: p.n, mid: mid, seed: seed, tm: 0 };
     inviteView(p.n); lobPresence();
-    inv.h = hostSession(ME, 30000,
-      function (pid) { if (INV === inv) lobPost({ t: 'inv', to: sid, n: ME.name, r: ME.r, pid: pid }); },
-      invLink(inv),
-      function () { if (INV === inv) { INV = null; lobPresence(); toast(inv.name + ' không phản hồi lời mời.'); homeView(); } });
+    lobPost({ t: 'inv', to: sid, mid: mid, seed: seed, n: ME.name, r: ME.r });
+    inv.tm = setTimeout(function () { if (INV === inv) { INV = null; lobPresence(); toast(inv.name + ' không phản hồi lời mời.'); homeView(); } }, 30000);
   }
   function cancelInv() {
-    if (INV && !INV.j) lobPost({ t: 'icx', to: INV.to });
+    if (INV) lobPost({ t: 'icx', to: INV.to });
     clearInv(); homeView();
   }
   function showInc(c) {
@@ -9338,9 +9326,9 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
   function acceptInc() {
     var c = INC; if (!c || INV || F || inMatch()) { hideInc(); return; }
     hideInc(); ME.r = stats(ME.u).r;
-    var inv = INV = { j: true, to: c.from, name: c.n, h: null };
-    connectView(c.n); lobPresence();
-    inv.h = joinSession(ME, c.pid, 8000, invLink(inv), function () { if (INV === inv) { INV = null; lobPresence(); toast('Không kết nối được với ' + c.n + '.'); homeView(); } });
+    var link = mkLink(c.mid, c.from, c.seed, c.n, c.r, 'guest');
+    lobPost({ t: 'iok', to: c.from, mid: c.mid, n: ME.name, r: ME.r });
+    startLink(link);
   }
 
   /* ---------- Trạng thái ---------- */
@@ -9421,17 +9409,14 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
   function findView() {
     body('<div class="ar-find"><div class="ar-spin"></div><div class="ar-count" id="ar-cd">' + (FIND_MS / 1000) + '</div>' +
       '<p class="ar-hero" style="margin:0"><b>Đang ghép trận…</b></p>' +
-      '<p class="ar-note" style="margin-top:6px">Không có ai cùng ghép trận sau ' + (FIND_MS / 1000) + ' giây bạn sẽ đấu với Bot.</p></div>' +
+      '<p class="ar-note" style="margin-top:6px">Không có ai cùng ghép trận sau ' + (FIND_MS / 1000) + ' giây bạn sẽ đấu với Bot.</p><p class="ar-note" id="ar-net" style="margin-top:6px"></p></div>' +
       '<button type="button" class="ar-btn ghost" data-act="cancel">Hủy</button>');
+    netStat();
   }
   function inviteView(name) {
     body('<div class="ar-find"><div class="ar-spin"></div><p class="ar-hero" style="margin:0"><b>Đã gửi lời mời tới ' + esc(name) + '…</b></p>' +
       '<p class="ar-note" style="margin-top:6px">Đang chờ đối thủ chấp nhận.</p></div>' +
       '<button type="button" class="ar-btn ghost" data-act="icancel">Hủy lời mời</button>');
-  }
-  function connectView(name) {
-    body('<div class="ar-find"><div class="ar-spin"></div><p class="ar-hero" style="margin:0"><b>Đang kết nối với ' + esc(name) + '…</b></p></div>' +
-      '<button type="button" class="ar-btn ghost" data-act="icancel">Hủy</button>');
   }
   function startFind() {
     stopFind(); ME.r = stats(ME.u).r;
@@ -9618,7 +9603,7 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
     ME = { u: u, name: (a.name() || u.split('@')[0]) };
     homeView(); lobOpen();
   }
-  function cancelInvQuiet() { if (INV && !INV.j) lobPost({ t: 'icx', to: INV.to }); clearInv(); }
+  function cancelInvQuiet() { if (INV) lobPost({ t: 'icx', to: INV.to }); clearInv(); }
   function close() {
     if (inMatch()) {
       if (!window.confirm('Rời trận lúc này sẽ tính là thua. Bạn vẫn muốn thoát?')) return;
@@ -9662,7 +9647,7 @@ html[data-theme="dark"]:not([data-skin]) #acct-modal .ac-who{background:#0f172a}
   });
   window.addEventListener('beforeunload', function () {
     if (inMatch()) send({ t: 'bye' });
-    if (lob.on) { try { navigator.sendBeacon('https://ntfy.sh/' + LOBBY, JSON.stringify({ t: 'bye', f: SID })); } catch (e) {} }
+    if (lob.on) lobPost({ t: 'bye' });
   });
 
   window.traceArena = { open: open, _bank: BANK, _pick: pick };
